@@ -1,0 +1,7 @@
+.vs/
+**/bin/
+**/obj/
+PrecompiledWeb/
+*.user
+*.suo
+/check-mau-tuhoc.cc.exe
