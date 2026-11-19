@@ -7,3 +7,6 @@ PrecompiledWeb/
 /check-mau-tuhoc.cc.exe
 
 *.py
+
+*.docx
+*.zip
