@@ -1,113 +1,186 @@
 <%@ Master Language="C#" %>
+<%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="PCMComputer" %>
+<script runat="server">
+    protected UserInfo CurrentUser;
+    protected int CartTotalCount = 0;
+    protected string SearchKeyword = "";
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        CurrentUser = SecurityHelper.GetCurrentUser();
+        CartTotalCount = SecurityHelper.GetCartCount();
+        if (!IsPostBack && Request.QueryString["q"] != null)
+        {
+            SearchKeyword = Request.QueryString["q"].Trim();
+        }
+    }
+</script>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head runat="server">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <asp:ContentPlaceHolder ID="HeadContent" runat="server">
-<link rel="stylesheet" href="./reset.css">
-<link rel="stylesheet" href="./style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-</asp:ContentPlaceHolder>
-    <title>Document</title>
+    <link rel="stylesheet" href="./reset.css">
+    <link rel="stylesheet" href="./style.css?v=1795077500">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+          integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+    <title>PCM Computer - Hệ Thống Bán Máy Tính &amp; Linh Kiện Chính Hãng</title>
 </head>
 <body>
-    <form id="contactForm" runat="server" ClientIDMode="Static">
-<header>
-        <div class="bannertop"><img src="./Image/bannertop.jpg" alt=""></div>
-    </header>
-    <asp:ContentPlaceHolder ID="NavigationContent" runat="server">
-<nav>
-        <div class="container">
-            <ul>
-                <li class="logo2"><a href="Home.aspx"><img src="./Image/logo2.png" alt=""></a></li>
-                <li><input type="text" placeholder="Bạn tìm gì..."><i class="fa-solid fa-magnifying-glass"></i></li>
-                <li><a href="Login.aspx"><button type="button"><i class="fa-solid fa-user"></i><span class="t1">Đăng nhập</span></button></a>
-                </li>
-                <li><a href="Cart.aspx"><button type="button"><i class="fa-solid fa-cart-shopping"></i><span class="t1">Giỏ
-                            hàng</span></button></a>
-                </li>
-                <li><a href="./Contact.aspx"> <button type="button"><i class="fa-solid fa-phone"></i><span class="t1">Liên
-                                hệ</span></button>
-                    </a></li>
-                <li><a href="./About.aspx"> <button type="button"><i class="fa-solid fa-newspaper"></i><span class="t1">Giới
-                                Thiệu</span></button>
-                    </a></li>
+    <form id="mainForm" runat="server" ClientIDMode="Static">
+        <header>
+            <div class="bannertop"><a href="Home.aspx"><img src="./Image/bannertop.jpg" alt="PCM Computer"></a></div>
+        </header>
 
-            </ul>
-        </div>
-    </nav>
-
-    <section class="menu-bar">
-        <div class="container">
-            <div class="menu-bar-content">
-                <ul>
-                    <li><a href="Products.aspx"><i class="fa-solid fa-receipt"></i>
-                            <span>DANH SÁCH SẢN PHẨM</span>
-                        </a></li>
-                    <li><a href="Phones.aspx"><i class="fa-solid fa-mobile-screen-button"></i>
-                            <span> Điện thoại </span>
-                        </a></li>
-                    <li><a href="Laptops.aspx"><i class="fa-solid fa-laptop"></i>Laptop</a></li>
-                    <li><a href="Accessories.aspx"><i class="fa-solid fa-headphones"></i>
-                            <span>Phụ kiện</span>
-                        </a></li>
-                    <li><a href="Watches.aspx"><i class="fa-solid fa-clock"></i>
-                            <span>Đồng hồ</span>
-                        </a></li>
-                    <li><a href="MonitorsPrinters.aspx"><i class="fa-solid fa-desktop"></i>
-                            <span>Màng hình, Máy in</span>
-                        </a></li>
-
-                </ul>
-            </div>
-        </div>
-    </section>
-</asp:ContentPlaceHolder>
-    <asp:ContentPlaceHolder ID="MainContent" runat="server" />
-<footer>
-        <div class="footer-title">
-            <h2>HỆ THỐNG CÁC SHOWROOM CỦA MÁY TÍNH PCM</h2>
-        </div>
-        <div class="container footer-content">
-            <div class="showroom-item">
-                <div class="sr-header">
-                    <div class="sr-num"><span>1</span></div>
-                    <div class="sr-title"><span>SHOWROOM - ĐỐNG ĐA - HÀ NỘI</span></div>
-                </div>
-                <div class="sr-body">
+        <asp:ContentPlaceHolder ID="NavigationContent" runat="server">
+            <nav>
+                <div class="container">
                     <ul>
-                        <li><i class="fa-solid fa-location-dot"></i> <span>Địa chỉ: 83-85 Thái Hà, Trung Liệt, Đống Đa,
-                                Hà Nội</span></li>
-                        <li><i class="fa-solid fa-map"></i> <a href="#">Xem bản đồ đường đi</a></li>
-                        <li><i class="fa-solid fa-phone"></i> <span>Liên hệ 24/7 Tel: 036.625.8142</span></li>
-                        <li><i class="fa-regular fa-clock"></i> <span>Thời gian mở cửa: Từ 9h00-20h00 hàng ngày</span>
+                        <li class="logo2">
+                            <a href="Home.aspx" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+                                <span style="background:linear-gradient(135deg, #CB1C21, #ef4444); color:#fff; font-weight:900; font-size:20px; padding:4px 10px; border-radius:8px; letter-spacing:1px; box-shadow:0 2px 8px rgba(0,0,0,0.25);">PCM</span>
+                                <span style="display:flex; flex-direction:column; line-height:1.15;">
+                                    <strong style="color:#ffffff; font-size:16px; font-weight:800; letter-spacing:0.5px;">COMPUTER</strong>
+                                    <small style="color:#fef08a; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">PC &amp; Linh Kiện Gaming</small>
+                                </span>
+                            </a>
                         </li>
+                        <li style="position:relative;">
+                            <input type="text" id="navSearchInput" value="<%= HttpUtility.HtmlAttributeEncode(SearchKeyword) %>"
+                                   placeholder="Tìm Laptop, PC, RTX 4060, Core i7..."
+                                   onkeydown="if(event.key==='Enter'){event.preventDefault();doGlobalSearch();}" />
+                            <i class="fa-solid fa-magnifying-glass" id="navSearchBtn" onclick="doGlobalSearch();" title="Tìm kiếm"></i>
+                        </li>
+
+                        <!-- Trang chủ -->
+                        <li>
+                            <a href="Home.aspx">
+                                <button type="button" class="nav-btn">
+                                    <i class="fa-solid fa-house"></i>
+                                    <span class="t1">Trang chủ</span>
+                                </button>
+                            </a>
+                        </li>
+
+                        <!-- Liên hệ -->
+                        <li>
+                            <a href="Contact.aspx">
+                                <button type="button" class="nav-btn">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <span class="t1">Liên hệ</span>
+                                </button>
+                            </a>
+                        </li>
+
+                        <!-- Giới thiệu -->
+                        <li>
+                            <a href="About.aspx">
+                                <button type="button" class="nav-btn">
+                                    <i class="fa-solid fa-newspaper"></i>
+                                    <span class="t1">Giới Thiệu</span>
+                                </button>
+                            </a>
+                        </li>
+
+                        <!-- Giỏ hàng: Đặt trước Đăng nhập / Tài khoản -->
+                        <li>
+                            <a href="Cart.aspx" title="Giỏ hàng" style="text-decoration:none; display:inline-block;">
+                                <button type="button" class="nav-btn nav-btn-cart" style="position:relative; width:44px; height:38px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:20px;">
+                                    <i class="fa-solid fa-cart-shopping" style="font-size:18px;"></i>
+                                    <span id="navCartBadge" class="nav-cart-badge" style="<%= (SecurityHelper.GetCartCount() > 0 ? "display:flex;" : "display:none;") %>">
+                                        <%= SecurityHelper.GetCartCount() %>
+                                    </span>
+                                </button>
+                            </a>
+                        </li>
+
+                        <!-- Đăng nhập & Đăng ký (ĐƯA QUA BÊN PHẢI CÙNG THEO YÊU CẦU CỦA USER) -->
+                        <% if (CurrentUser == null) { %>
+                            <li style="display:flex; gap:6px; align-items:center;">
+                                <a href="Login.aspx"><button type="button" class="nav-btn"><i class="fa-solid fa-user"></i> <span class="t1">Đăng nhập</span></button></a>
+                                <a href="Register.aspx"><button type="button" class="nav-btn"><i class="fa-solid fa-user-plus"></i> <span class="t1">Đăng ký</span></button></a>
+                            </li>
+                        <% } else { %>
+                            <li style="display:flex; gap:5px; align-items:center;">
+                                <% if (CurrentUser.Role == "Admin") { %>
+                                    <a href="Admin.aspx"><button type="button" class="nav-btn nav-btn-admin"><i class="fa-solid fa-user-shield"></i> <span class="t1">Admin</span></button></a>
+                                    <a href="Staff.aspx"><button type="button" class="nav-btn nav-btn-staff"><i class="fa-solid fa-clipboard-check"></i> <span class="t1">Nghiệp vụ</span></button></a>
+                                <% } else if (CurrentUser.Role == "Staff") { %>
+                                    <a href="Staff.aspx"><button type="button" class="nav-btn nav-btn-staff"><i class="fa-solid fa-clipboard-check"></i> <span class="t1">Nghiệp vụ</span></button></a>
+                                <% } %>
+                                <a href="MyOrders.aspx"><button type="button" class="nav-btn"><i class="fa-solid fa-box-open"></i> <span class="t1">Đơn hàng</span></button></a>
+                                <a href="Profile.aspx" title="Hồ sơ: <%= HttpUtility.HtmlAttributeEncode(CurrentUser.FullName) %>">
+                                    <button type="button" class="nav-btn" style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        <i class="fa-solid fa-circle-user"></i> <span class="t1"><%= HttpUtility.HtmlEncode(CurrentUser.Username) %></span>
+                                    </button>
+                                </a>
+                                <a href="Logout.aspx" title="Đăng xuất"><button type="button" class="nav-btn nav-btn-logout"><i class="fa-solid fa-right-from-bracket"></i></button></a>
+                            </li>
+                        <% } %>
                     </ul>
                 </div>
-            </div>
+            </nav>
 
-            <div class="showroom-item">
-                <div class="sr-header">
-                    <div class="sr-num"><span>2</span></div>
-                    <div class="sr-title"><span>SHOWROOM QUẬN 10, HỒ CHÍ MINH</span></div>
+            <section class="menu-bar">
+                <div class="container">
+                    <div class="menu-bar-content">
+                        <ul>
+                            <li><a href="Products.aspx"><i class="fa-solid fa-layer-group"></i><span>TẤT CẢ SẢN PHẨM</span></a></li>
+                            <li><a href="GamingLaptops.aspx"><i class="fa-solid fa-fire"></i><span>Laptop Gaming</span></a></li>
+                            <li><a href="Laptops.aspx"><i class="fa-solid fa-laptop"></i><span>Laptop Văn Phòng</span></a></li>
+                            <li><a href="GamingPCs.aspx"><i class="fa-solid fa-computer"></i><span>PC Gaming</span></a></li>
+                            <li><a href="Workstations.aspx"><i class="fa-solid fa-microchip"></i><span>PC Đồ Họa &amp; AI</span></a></li>
+                            <li><a href="Components.aspx"><i class="fa-solid fa-memory"></i><span>Linh Kiện PC</span></a></li>
+                            <li><a href="MonitorsPrinters.aspx"><i class="fa-solid fa-desktop"></i><span>Màn Hình, Máy In</span></a></li>
+                            <li><a href="Accessories.aspx"><i class="fa-solid fa-headphones"></i><span>Phụ Kiện &amp; Gear</span></a></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="sr-body">
-                    <ul>
-                        <li><i class="fa-solid fa-location-dot"></i> <span>Địa chỉ: Số 83A Cửu Long, Phường 15, Quận 10,
-                                TP Hồ Chí Minh</span></li>
-                        <li><i class="fa-solid fa-map"></i> <a href="#">Xem bản đồ đường đi</a></li>
-                        <li><i class="fa-solid fa-phone"></i> <span>Liên hệ 24/7 Tel: 087.997.9997</span></li>
-                        <li><i class="fa-regular fa-clock"></i> <span>Thời gian mở cửa: Từ 9h00-20h00 hàng ngày</span>
-                        </li>
-                    </ul>
+            </section>
+        </asp:ContentPlaceHolder>
+
+        <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+
+        <footer>
+            <div class="footer-title">
+                <h2>HỆ THỐNG CÁC SHOWROOM CỦA MÁY TÍNH PCM</h2>
+            </div>
+            <div class="container footer-content">
+                <div class="showroom-item">
+                    <div class="sr-header">
+                        <div class="sr-num"><span>1</span></div>
+                        <div class="sr-title"><span>SHOWROOM - ĐỐNG ĐA - HÀ NỘI</span></div>
+                    </div>
+                    <div class="sr-body">
+                        <ul>
+                            <li><i class="fa-solid fa-location-dot"></i> <span>Địa chỉ: 83-85 Thái Hà, Trung Liệt, Đống Đa, Hà Nội</span></li>
+                            <li><i class="fa-solid fa-map"></i> <a href="Contact.aspx">Xem bản đồ đường đi</a></li>
+                            <li><i class="fa-solid fa-phone"></i> <span>Liên hệ 24/7 Tel: 036.625.8142</span></li>
+                            <li><i class="fa-regular fa-clock"></i> <span>Thời gian mở cửa: Từ 9h00-20h00 hàng ngày</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="showroom-item">
+                    <div class="sr-header">
+                        <div class="sr-num"><span>2</span></div>
+                        <div class="sr-title"><span>SHOWROOM QUẬN 10, HỒ CHÍ MINH</span></div>
+                    </div>
+                    <div class="sr-body">
+                        <ul>
+                            <li><i class="fa-solid fa-location-dot"></i> <span>Địa chỉ: Số 83A Cửu Long, Phường 15, Quận 10, TP Hồ Chí Minh</span></li>
+                            <li><i class="fa-solid fa-map"></i> <a href="Contact.aspx">Xem bản đồ đường đi</a></li>
+                            <li><i class="fa-solid fa-phone"></i> <span>Liên hệ 24/7 Tel: 087.997.9997</span></li>
+                            <li><i class="fa-regular fa-clock"></i> <span>Thời gian mở cửa: Từ 9h00-20h00 hàng ngày</span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
     </form>
-    <script src="./main.js"></script>
+    <script src="./main.js?v=1795077500"></script>
 </body>
 </html>
