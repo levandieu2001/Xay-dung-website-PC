@@ -1,6 +1,6 @@
 # PCM Computer — Hệ Thống Website Bán Máy Tính và Linh Kiện (ASP.NET Web Forms + SQL Server)
 
-Dự án ASP.NET Web Forms (C# / .NET Framework 4.8) kết nối Cơ sở dữ liệu **SQL Server (`.\SQLEXPRESS` - `PCMComputerDB`)**, được xây dựng đầy đủ theo tài liệu đặc tả **`Website-Laptop-Linh-Kien.docx`** (16 Yêu cầu chức năng `FR01` – `FR16`, 16 Use Case `UC01` – `UC16`, 8 Yêu cầu phi chức năng `NFR01` – `NFR08`, Biểu đồ hoạt động và Biểu đồ tuần tự).
+Dự án ASP.NET Web Forms (C# / .NET Framework 4.8) kết nối Cơ sở dữ liệu **SQL Server (`.\SQLEXPRESS` - `PCMComputerDB`)**, được xây dựng đầy đủ theo tài liệu đặc tả **`Website-Laptop-Linh-Kien.docx`** (16 Yêu cầu chức năng `FR01` – `FR16`, 16 ca sử dụng `UC01` – `UC16`, 8 Yêu cầu phi chức năng `NFR01` – `NFR08`, Biểu đồ hoạt động và Biểu đồ tuần tự).
 
 Xem nhật ký chi tiết quá trình xây dựng và kiểm thử tại: **[`QUA_TRINH_THUC_HIEN.md`](file:///d:/WEB/QUA_TRINH_THUC_HIEN.md)**.
 
@@ -10,9 +10,9 @@ Xem nhật ký chi tiết quá trình xây dựng và kiểm thử tại: **[`QU
 
 | Phân hệ / Vai trò | Tên đăng nhập | Mật khẩu | Trang điều hướng | Ghi chú |
 | :--- | :--- | :--- | :--- | :--- |
-| **Quản trị viên (Admin)** | `admin` | `123456` | `Admin.aspx` | Toàn quyền quản lý hệ thống & thống kê doanh thu (`UC09` – `UC14`) |
-| **Nhân viên (Staff)** | `staff` | `123456` | `Staff.aspx` | Xử lý đơn hàng (`UC11`) & kiểm tra tồn kho, cập nhật mô tả SP (`UC09`) |
-| **Khách hàng (Customer)** | `khachhang` | `123456` | `Home.aspx` | Mua sắm, giỏ hàng, áp mã KM, đặt hàng COD, theo dõi & hủy đơn |
+| **Quản trị viên** | `admin` | `123456` | `QuanTri.aspx` | Toàn quyền quản lý hệ thống & thống kê doanh thu (`UC09` – `UC14`) |
+| **nhân viên** | `staff` | `123456` | `NhanVien.aspx` | Xử lý đơn hàng (`UC11`) & kiểm tra tồn kho, cập nhật mô tả sản phẩm (`UC09`) |
+| **Khách hàng** | `khachhang` | `123456` | `TrangChu.aspx` | Mua sắm, giỏ hàng, áp mã khuyến mãi, đặt hàng COD, theo dõi & hủy đơn |
 | **Tài khoản bị khóa** | `userlocked` | `123456` | *(Từ chối)* | Dùng để kiểm thử luồng ngoại lệ tài khoản bị khóa (`UC02`) |
 
 ### Mã giảm giá / Khuyến mãi mẫu (`UC13`, `UC16`)
@@ -25,8 +25,8 @@ Xem nhật ký chi tiết quá trình xây dựng và kiểm thử tại: **[`QU
 
 ## 2. Khởi tạo Cơ sở dữ liệu SQL Server
 
-- Cơ sở dữ liệu **`PCMComputerDB`** đã được tự động tạo và nạp dữ liệu mẫu trên **`.\SQLEXPRESS`**.
-- Kịch bản SQL đầy đủ được lưu tại [`Database_PCMComputer.sql`](file:///d:/WEB/Database_PCMComputer.sql) (có thể mở và chạy trực tiếp trong SQL Server Management Studio - SSMS).
+- Cài mới bằng [csdl_PCMComputer.sql](csdl_PCMComputer.sql) trong SQL Server Management Studio. Tệp này sẽ xóa cơ sở dữ liệu `PCMComputerDB` hiện có trước khi tạo lại.
+- Nếu đã có dữ liệu từ phiên bản dùng tên bảng tiếng Anh, chạy [csdl_doi_ten_bang.sql](csdl_doi_ten_bang.sql) để đổi tên bảng và giữ dữ liệu.
 
 ---
 
@@ -39,8 +39,8 @@ Trong PowerShell:
 ```
 
 Sau đó mở trình duyệt tại:
-- Trang chủ bán hàng: `http://localhost:5088/Home.aspx`
-- Trang danh sách & lọc sản phẩm: `http://localhost:5088/Products.aspx`
-- Trang đăng nhập (có nút chọn nhanh tài khoản mẫu): `http://localhost:5088/Login.aspx`
-- Trang nghiệp vụ Nhân viên (Staff): `http://localhost:5088/Staff.aspx`
-- Trang quản trị hệ thống (Admin): `http://localhost:5088/Admin.aspx`
+- Trang chủ bán hàng: `http://localhost:5088/TrangChu.aspx`
+- Trang danh sách & lọc sản phẩm: `http://localhost:5088/SanPham.aspx`
+- Trang đăng nhập (có nút chọn nhanh tài khoản mẫu): `http://localhost:5088/DangNhap.aspx`
+- Trang nghiệp vụ nhân viên: `http://localhost:5088/NhanVien.aspx`
+- Trang quản trị hệ thống: `http://localhost:5088/QuanTri.aspx`
