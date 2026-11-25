@@ -40,9 +40,9 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked, CreatedAt
+                string sql = @"SELECT ID_TAIKHOAN, TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA, NGAY_TAO
                                FROM dbo.TAIKHOAN
-                               WHERE (Username = @u OR Email = @u)";
+                               WHERE (TEN_DANG_NHAP = @u OR THU_DIEN_TU = @u)";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@u", usernameOrEmail.Trim());
@@ -100,7 +100,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string checkSql = "SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE Username = @u OR Email = @e OR Phone = @p";
+                string checkSql = "SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE TEN_DANG_NHAP = @u OR THU_DIEN_TU = @e OR SO_DIEN_THOAI = @p";
                 using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
                 {
                     checkCmd.Parameters.AddWithValue("@u", username.Trim());
@@ -115,7 +115,7 @@ namespace PCMComputer
                 }
 
                 string hash = SecurityHelper.HashPassword(password.Trim());
-                string insertSql = @"INSERT INTO dbo.TAIKHOAN (Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked)
+                string insertSql = @"INSERT INTO dbo.TAIKHOAN (TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA)
                                      VALUES (@u, @pw, @fn, @e, @ph, @ad, 'Customer', 0);
                                      SELECT SCOPE_IDENTITY();";
                 using (SqlCommand cmd = new SqlCommand(insertSql, conn))
@@ -137,7 +137,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = "SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked, CreatedAt FROM dbo.TAIKHOAN WHERE UserId = @id";
+                string sql = "SELECT ID_TAIKHOAN, TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA, NGAY_TAO FROM dbo.TAIKHOAN WHERE ID_TAIKHOAN = @id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", userId);
@@ -163,7 +163,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string checkSql = "SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE Email = @e AND UserId <> @id";
+                string checkSql = "SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE THU_DIEN_TU = @e AND ID_TAIKHOAN <> @id";
                 using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
                 {
                     checkCmd.Parameters.AddWithValue("@e", email.Trim());
@@ -175,7 +175,7 @@ namespace PCMComputer
                     }
                 }
 
-                string sql = "UPDATE dbo.TAIKHOAN SET FullName = @fn, Email = @e, Phone = @ph, Address = @ad WHERE UserId = @id";
+                string sql = "UPDATE dbo.TAIKHOAN SET HO_TEN = @fn, THU_DIEN_TU = @e, SO_DIEN_THOAI = @ph, DIA_CHI = @ad WHERE ID_TAIKHOAN = @id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@fn", fullName.Trim());
@@ -222,7 +222,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("UPDATE dbo.TAIKHOAN SET PasswordHash = @pw WHERE UserId = @id", conn))
+                using (SqlCommand cmd = new SqlCommand("UPDATE dbo.TAIKHOAN SET MA_BAM_MAT_KHAU = @pw WHERE ID_TAIKHOAN = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@pw", newHash);
                     cmd.Parameters.AddWithValue("@id", userId);
@@ -238,13 +238,13 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT UserId, Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked, CreatedAt
+                string sql = @"SELECT ID_TAIKHOAN, TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA, NGAY_TAO
                                FROM dbo.TAIKHOAN WHERE 1=1";
                 if (!string.IsNullOrWhiteSpace(roleFilter))
-                    sql += " AND Role = @role";
+                    sql += " AND VAI_TRO = @role";
                 if (!string.IsNullOrWhiteSpace(keyword))
-                    sql += " AND (Username LIKE @kw OR FullName LIKE @kw OR Email LIKE @kw OR Phone LIKE @kw)";
-                sql += " ORDER BY CASE Role WHEN 'Admin' THEN 1 WHEN 'Staff' THEN 2 ELSE 3 END, UserId ASC";
+                    sql += " AND (TEN_DANG_NHAP LIKE @kw OR HO_TEN LIKE @kw OR THU_DIEN_TU LIKE @kw OR SO_DIEN_THOAI LIKE @kw)";
+                sql += " ORDER BY CASE VAI_TRO WHEN 'Admin' THEN 1 WHEN 'Staff' THEN 2 ELSE 3 END, ID_TAIKHOAN ASC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -284,7 +284,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE Username = @u OR Email = @e", conn))
+                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.TAIKHOAN WHERE TEN_DANG_NHAP = @u OR THU_DIEN_TU = @e", conn))
                 {
                     chk.Parameters.AddWithValue("@u", username.Trim());
                     chk.Parameters.AddWithValue("@e", email.Trim());
@@ -296,7 +296,7 @@ namespace PCMComputer
                 }
 
                 string validRole = (role == "Admin" || role == "Staff") ? role : "Customer";
-                string sql = @"INSERT INTO dbo.TAIKHOAN (Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked)
+                string sql = @"INSERT INTO dbo.TAIKHOAN (TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA)
                                VALUES (@u, @pw, @fn, @e, @ph, @ad, @r, 0)";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -330,7 +330,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("UPDATE dbo.TAIKHOAN SET Role = @r, IsLocked = @l WHERE UserId = @id", conn))
+                using (SqlCommand cmd = new SqlCommand("UPDATE dbo.TAIKHOAN SET VAI_TRO = @r, BI_KHOA = @l WHERE ID_TAIKHOAN = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@r", validRole);
                     cmd.Parameters.AddWithValue("@l", isLocked);
@@ -344,16 +344,16 @@ namespace PCMComputer
         private static UserInfo MapUser(SqlDataReader r)
         {
             UserInfo u = new UserInfo();
-            u.UserId = Convert.ToInt32(r["UserId"]);
-            u.Username = Convert.ToString(r["Username"]);
-            u.PasswordHash = Convert.ToString(r["PasswordHash"]);
-            u.FullName = Convert.ToString(r["FullName"]);
-            u.Email = Convert.ToString(r["Email"]);
-            u.Phone = Convert.ToString(r["Phone"]);
-            u.Address = r["Address"] != DBNull.Value ? Convert.ToString(r["Address"]) : "";
-            u.Role = Convert.ToString(r["Role"]);
-            u.IsLocked = Convert.ToBoolean(r["IsLocked"]);
-            u.CreatedAt = Convert.ToDateTime(r["CreatedAt"]);
+            u.UserId = Convert.ToInt32(r["ID_TAIKHOAN"]);
+            u.Username = Convert.ToString(r["TEN_DANG_NHAP"]);
+            u.PasswordHash = Convert.ToString(r["MA_BAM_MAT_KHAU"]);
+            u.FullName = Convert.ToString(r["HO_TEN"]);
+            u.Email = Convert.ToString(r["THU_DIEN_TU"]);
+            u.Phone = Convert.ToString(r["SO_DIEN_THOAI"]);
+            u.Address = r["DIA_CHI"] != DBNull.Value ? Convert.ToString(r["DIA_CHI"]) : "";
+            u.Role = Convert.ToString(r["VAI_TRO"]);
+            u.IsLocked = Convert.ToBoolean(r["BI_KHOA"]);
+            u.CreatedAt = Convert.ToDateTime(r["NGAY_TAO"]);
             return u;
         }
 
@@ -366,12 +366,12 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT c.CategoryId, c.CategoryName, c.Slug, c.PageUrl, c.IconPath, c.Description, c.DisplayOrder, c.IsActive,
-                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.CategoryId = c.CategoryId AND p.Status = N'Đang kinh doanh') AS ProductCount
+                string sql = @"SELECT c.ID_DANHMUC, c.TEN_DANH_MUC, c.TEN_RUT_GON, c.DUONG_DAN_TRANG, c.DUONG_DAN_BIEU_TUONG, c.MO_TA, c.THU_TU_HIEN_THI, c.DANG_HOAT_DONG,
+                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.ID_DANHMUC = c.ID_DANHMUC AND p.TRANG_THAI = N'Đang kinh doanh') AS ProductCount
                                FROM dbo.DANHMUC c";
                 if (activeOnly)
-                    sql += " WHERE c.IsActive = 1";
-                sql += " ORDER BY c.DisplayOrder ASC, c.CategoryId ASC";
+                    sql += " WHERE c.DANG_HOAT_DONG = 1";
+                sql += " ORDER BY c.THU_TU_HIEN_THI ASC, c.ID_DANHMUC ASC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -392,9 +392,9 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT c.CategoryId, c.CategoryName, c.Slug, c.PageUrl, c.IconPath, c.Description, c.DisplayOrder, c.IsActive,
-                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.CategoryId = c.CategoryId) AS ProductCount
-                               FROM dbo.DANHMUC c WHERE c.CategoryId = @id";
+                string sql = @"SELECT c.ID_DANHMUC, c.TEN_DANH_MUC, c.TEN_RUT_GON, c.DUONG_DAN_TRANG, c.DUONG_DAN_BIEU_TUONG, c.MO_TA, c.THU_TU_HIEN_THI, c.DANG_HOAT_DONG,
+                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.ID_DANHMUC = c.ID_DANHMUC) AS ProductCount
+                               FROM dbo.DANHMUC c WHERE c.ID_DANHMUC = @id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", categoryId);
@@ -412,9 +412,9 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT TOP 1 c.CategoryId, c.CategoryName, c.Slug, c.PageUrl, c.IconPath, c.Description, c.DisplayOrder, c.IsActive,
-                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.CategoryId = c.CategoryId) AS ProductCount
-                               FROM dbo.DANHMUC c WHERE c.PageUrl = @url OR c.Slug = @url";
+                string sql = @"SELECT TOP 1 c.ID_DANHMUC, c.TEN_DANH_MUC, c.TEN_RUT_GON, c.DUONG_DAN_TRANG, c.DUONG_DAN_BIEU_TUONG, c.MO_TA, c.THU_TU_HIEN_THI, c.DANG_HOAT_DONG,
+                                      (SELECT COUNT(*) FROM dbo.SANPHAM p WHERE p.ID_DANHMUC = c.ID_DANHMUC) AS ProductCount
+                               FROM dbo.DANHMUC c WHERE c.DUONG_DAN_TRANG = @url OR c.TEN_RUT_GON = @url";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@url", pageUrl);
@@ -445,7 +445,7 @@ namespace PCMComputer
             {
                 conn.Open();
                 // Kiểm tra trùng tên danh mục (UC10)
-                string checkSql = "SELECT COUNT(*) FROM dbo.DANHMUC WHERE (CategoryName = @name OR Slug = @slug) AND CategoryId <> @id";
+                string checkSql = "SELECT COUNT(*) FROM dbo.DANHMUC WHERE (TEN_DANH_MUC = @name OR TEN_RUT_GON = @slug) AND ID_DANHMUC <> @id";
                 using (SqlCommand chk = new SqlCommand(checkSql, conn))
                 {
                     chk.Parameters.AddWithValue("@name", cat.CategoryName.Trim());
@@ -460,7 +460,7 @@ namespace PCMComputer
 
                 if (cat.CategoryId <= 0)
                 {
-                    string ins = @"INSERT INTO dbo.DANHMUC (CategoryName, Slug, PageUrl, IconPath, Description, DisplayOrder, IsActive)
+                    string ins = @"INSERT INTO dbo.DANHMUC (TEN_DANH_MUC, TEN_RUT_GON, DUONG_DAN_TRANG, DUONG_DAN_BIEU_TUONG, MO_TA, THU_TU_HIEN_THI, DANG_HOAT_DONG)
                                    VALUES (@name, @slug, @url, @icon, @desc, @ord, @act)";
                     using (SqlCommand cmd = new SqlCommand(ins, conn))
                     {
@@ -477,9 +477,9 @@ namespace PCMComputer
                 else
                 {
                     string upd = @"UPDATE dbo.DANHMUC
-                                   SET CategoryName = @name, Slug = @slug, PageUrl = @url, IconPath = @icon,
-                                       Description = @desc, DisplayOrder = @ord, IsActive = @act
-                                   WHERE CategoryId = @id";
+                                   SET TEN_DANH_MUC = @name, TEN_RUT_GON = @slug, DUONG_DAN_TRANG = @url, DUONG_DAN_BIEU_TUONG = @icon,
+                                       MO_TA = @desc, THU_TU_HIEN_THI = @ord, DANG_HOAT_DONG = @act
+                                   WHERE ID_DANHMUC = @id";
                     using (SqlCommand cmd = new SqlCommand(upd, conn))
                     {
                         cmd.Parameters.AddWithValue("@name", cat.CategoryName.Trim());
@@ -504,7 +504,7 @@ namespace PCMComputer
             {
                 conn.Open();
                 // Ngoại lệ UC10: Nếu danh mục đang chứa sản phẩm trực thuộc, ngăn thao tác xóa
-                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE CategoryId = @id", conn))
+                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE ID_DANHMUC = @id", conn))
                 {
                     chk.Parameters.AddWithValue("@id", categoryId);
                     int prodCount = Convert.ToInt32(chk.ExecuteScalar());
@@ -515,7 +515,7 @@ namespace PCMComputer
                     }
                 }
 
-                using (SqlCommand cmd = new SqlCommand("DELETE FROM dbo.DANHMUC WHERE CategoryId = @id", conn))
+                using (SqlCommand cmd = new SqlCommand("DELETE FROM dbo.DANHMUC WHERE ID_DANHMUC = @id", conn))
                 {
                     cmd.Parameters.AddWithValue("@id", categoryId);
                     cmd.ExecuteNonQuery();
@@ -583,14 +583,14 @@ namespace PCMComputer
         private static CategoryInfo MapCategory(SqlDataReader r)
         {
             CategoryInfo c = new CategoryInfo();
-            c.CategoryId = Convert.ToInt32(r["CategoryId"]);
-            c.CategoryName = Convert.ToString(r["CategoryName"]);
-            c.Slug = Convert.ToString(r["Slug"]);
-            c.PageUrl = r["PageUrl"] != DBNull.Value ? LocalizeCategoryPage(Convert.ToString(r["PageUrl"])) : "SanPham.aspx";
-            c.IconPath = r["IconPath"] != DBNull.Value ? LocalizeAssetPath(Convert.ToString(r["IconPath"])) : "./BieuTuong/linhkien.png";
-            c.Description = r["Description"] != DBNull.Value ? Convert.ToString(r["Description"]) : "";
-            c.DisplayOrder = Convert.ToInt32(r["DisplayOrder"]);
-            c.IsActive = Convert.ToBoolean(r["IsActive"]);
+            c.CategoryId = Convert.ToInt32(r["ID_DANHMUC"]);
+            c.CategoryName = Convert.ToString(r["TEN_DANH_MUC"]);
+            c.Slug = Convert.ToString(r["TEN_RUT_GON"]);
+            c.PageUrl = r["DUONG_DAN_TRANG"] != DBNull.Value ? LocalizeCategoryPage(Convert.ToString(r["DUONG_DAN_TRANG"])) : "SanPham.aspx";
+            c.IconPath = r["DUONG_DAN_BIEU_TUONG"] != DBNull.Value ? LocalizeAssetPath(Convert.ToString(r["DUONG_DAN_BIEU_TUONG"])) : "./BieuTuong/linhkien.png";
+            c.Description = r["MO_TA"] != DBNull.Value ? Convert.ToString(r["MO_TA"]) : "";
+            c.DisplayOrder = Convert.ToInt32(r["THU_TU_HIEN_THI"]);
+            c.IsActive = Convert.ToBoolean(r["DANG_HOAT_DONG"]);
             c.ProductCount = r["ProductCount"] != DBNull.Value ? Convert.ToInt32(r["ProductCount"]) : 0;
             return c;
         }
@@ -604,11 +604,11 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = string.Format(@"SELECT TOP {0} p.*, c.CategoryName
+                string sql = string.Format(@"SELECT TOP {0} p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
-                               WHERE p.Status = N'Đang kinh doanh' AND p.IsDeal = 1
-                               ORDER BY p.ProductId ASC", top);
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
+                               WHERE p.TRANG_THAI = N'Đang kinh doanh' AND p.GIA_SOC = 1
+                               ORDER BY p.ID_SANPHAM ASC", top);
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     using (SqlDataReader r = cmd.ExecuteReader())
@@ -626,13 +626,13 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = string.Format(@"SELECT TOP {0} p.*, c.CategoryName
+                string sql = string.Format(@"SELECT TOP {0} p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
-                               WHERE p.Status = N'Đang kinh doanh'", top);
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
+                               WHERE p.TRANG_THAI = N'Đang kinh doanh'", top);
                 if (categoryId.HasValue && categoryId.Value > 0)
-                    sql += " AND p.CategoryId = @catId";
-                sql += " ORDER BY p.SoldCount DESC, p.ProductId ASC";
+                    sql += " AND p.ID_DANHMUC = @catId";
+                sql += " ORDER BY p.SO_LUONG_DA_BAN DESC, p.ID_SANPHAM ASC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -653,16 +653,16 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT p.*, c.CategoryName
+                string sql = @"SELECT p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
                                WHERE 1=1";
 
                 if (!includeInactive)
-                    sql += " AND p.Status = N'Đang kinh doanh'";
+                    sql += " AND p.TRANG_THAI = N'Đang kinh doanh'";
 
                 if (categoryId.HasValue && categoryId.Value > 0)
-                    sql += " AND p.CategoryId = @catId";
+                    sql += " AND p.ID_DANHMUC = @catId";
 
                 string kwLower = (keyword ?? "").Trim().ToLower();
                 bool isIntent = false;
@@ -672,127 +672,127 @@ namespace PCMComputer
                     if (kwLower == "vga" || kwLower == "card man hinh" || kwLower == "card màn hình" || kwLower == "card do hoa" || kwLower == "card đồ họa" || kwLower == "gpu")
                     {
                         isIntent = true;
-                        sql += " AND (p.ProductName LIKE N'%VGA%' OR p.ProductCode LIKE N'%VGA%' OR (p.CategoryId = 6 AND (p.ProductName LIKE N'%GeForce%' OR p.ProductName LIKE N'%RTX%' OR p.ProductName LIKE N'%GTX%' OR p.ProductName LIKE N'%Radeon%')))";
+                        sql += " AND (p.TEN_SAN_PHAM LIKE N'%VGA%' OR p.MA_SAN_PHAM LIKE N'%VGA%' OR (p.ID_DANHMUC = 6 AND (p.TEN_SAN_PHAM LIKE N'%GeForce%' OR p.TEN_SAN_PHAM LIKE N'%RTX%' OR p.TEN_SAN_PHAM LIKE N'%GTX%' OR p.TEN_SAN_PHAM LIKE N'%Radeon%')))";
                     }
                     else if (kwLower == "pc" || kwLower == "máy tính bàn" || kwLower == "may tinh ban" || kwLower == "pc gaming" || kwLower == "pc do hoa" || kwLower == "pc đồ họa")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId IN (3, 4, 5) OR p.ProductName LIKE N'PC %' OR p.ProductName LIKE N'% PC %' OR p.ProductName LIKE N'Bộ Mini PC%')";
+                        sql += " AND (p.ID_DANHMUC IN (3, 4, 5) OR p.TEN_SAN_PHAM LIKE N'PC %' OR p.TEN_SAN_PHAM LIKE N'% PC %' OR p.TEN_SAN_PHAM LIKE N'Bộ Mini PC%')";
                     }
                     else if (kwLower == "laptop" || kwLower == "máy tính xách tay" || kwLower == "may tinh xach tay" || kwLower == "notebook")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId IN (1, 2) OR p.ProductName LIKE N'%Laptop%')";
+                        sql += " AND (p.ID_DANHMUC IN (1, 2) OR p.TEN_SAN_PHAM LIKE N'%Laptop%')";
                     }
                     else if (kwLower == "ram")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 6 AND (p.ProductName LIKE N'%RAM%' OR p.ProductName LIKE N'%Bộ nhớ trong%'))";
+                        sql += " AND (p.ID_DANHMUC = 6 AND (p.TEN_SAN_PHAM LIKE N'%RAM%' OR p.TEN_SAN_PHAM LIKE N'%Bộ nhớ trong%'))";
                     }
                     else if (kwLower == "cpu" || kwLower == "chip" || kwLower == "vi xử lý" || kwLower == "vi xu ly")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 6 AND (p.ProductName LIKE N'%CPU%' OR p.ProductName LIKE N'%Core i%' OR p.ProductName LIKE N'%Ryzen%'))";
+                        sql += " AND (p.ID_DANHMUC = 6 AND (p.TEN_SAN_PHAM LIKE N'%CPU%' OR p.TEN_SAN_PHAM LIKE N'%Core i%' OR p.TEN_SAN_PHAM LIKE N'%Ryzen%'))";
                     }
                     else if (kwLower == "ssd" || kwLower == "ổ cứng" || kwLower == "o cung")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 6 AND (p.ProductName LIKE N'%SSD%' OR p.ProductName LIKE N'%Ổ Cứng%'))";
+                        sql += " AND (p.ID_DANHMUC = 6 AND (p.TEN_SAN_PHAM LIKE N'%SSD%' OR p.TEN_SAN_PHAM LIKE N'%Ổ Cứng%'))";
                     }
                     else if (kwLower == "main" || kwLower == "mainboard" || kwLower == "bo mạch chủ" || kwLower == "bo mach chu")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 6 AND (p.ProductName LIKE N'%Mainboard%' OR p.ProductName LIKE N'%Bo Mạch Chủ%'))";
+                        sql += " AND (p.ID_DANHMUC = 6 AND (p.TEN_SAN_PHAM LIKE N'%Mainboard%' OR p.TEN_SAN_PHAM LIKE N'%Bo Mạch Chủ%'))";
                     }
                     else if (kwLower == "màn hình" || kwLower == "man hinh" || kwLower == "monitor")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 7 AND p.ProductName LIKE N'%Màn Hình%')";
+                        sql += " AND (p.ID_DANHMUC = 7 AND p.TEN_SAN_PHAM LIKE N'%Màn Hình%')";
                     }
                     else if (kwLower == "máy in" || kwLower == "may in" || kwLower == "printer")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 7 AND p.ProductName LIKE N'%Máy In%')";
+                        sql += " AND (p.ID_DANHMUC = 7 AND p.TEN_SAN_PHAM LIKE N'%Máy In%')";
                     }
                     else if (kwLower == "chuột" || kwLower == "chuot" || kwLower == "mouse")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 8 AND (p.ProductName LIKE N'%Chuột%' OR p.ProductName LIKE N'%Mouse%'))";
+                        sql += " AND (p.ID_DANHMUC = 8 AND (p.TEN_SAN_PHAM LIKE N'%Chuột%' OR p.TEN_SAN_PHAM LIKE N'%Mouse%'))";
                     }
                     else if (kwLower == "bàn phím" || kwLower == "ban phim" || kwLower == "keyboard")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 8 AND (p.ProductName LIKE N'%Bàn Phím%' OR p.ProductName LIKE N'%Keyboard%'))";
+                        sql += " AND (p.ID_DANHMUC = 8 AND (p.TEN_SAN_PHAM LIKE N'%Bàn Phím%' OR p.TEN_SAN_PHAM LIKE N'%Keyboard%'))";
                     }
                     else if (kwLower == "tai nghe" || kwLower == "headphone" || kwLower == "headset")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 10 AND (p.ProductName LIKE N'%Tai Nghe%' OR p.ProductName LIKE N'%Headset%'))";
+                        sql += " AND (p.ID_DANHMUC = 10 AND (p.TEN_SAN_PHAM LIKE N'%Tai Nghe%' OR p.TEN_SAN_PHAM LIKE N'%Headset%'))";
                     }
                     else if (kwLower == "loa" || kwLower == "speaker")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 10 AND (p.ProductName LIKE N'%Loa %' OR p.ProductName LIKE N'%Speaker%'))";
+                        sql += " AND (p.ID_DANHMUC = 10 AND (p.TEN_SAN_PHAM LIKE N'%Loa %' OR p.TEN_SAN_PHAM LIKE N'%Speaker%'))";
                     }
                     else if (kwLower == "webcam" || kwLower == "camera" || kwLower == "cam")
                     {
                         isIntent = true;
-                        sql += " AND ((p.CategoryId = 10 AND p.ProductName LIKE N'%Webcam%') OR (p.CategoryId = 12 AND p.ProductName LIKE N'%Camera%'))";
+                        sql += " AND ((p.ID_DANHMUC = 10 AND p.TEN_SAN_PHAM LIKE N'%Webcam%') OR (p.ID_DANHMUC = 12 AND p.TEN_SAN_PHAM LIKE N'%Camera%'))";
                     }
                     else if (kwLower == "tản nhiệt" || kwLower == "tan nhiet" || kwLower == "cooler" || kwLower == "aio")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 11)";
+                        sql += " AND (p.ID_DANHMUC = 11)";
                     }
                     else if (kwLower == "đồng hồ" || kwLower == "dong ho" || kwLower == "watch" || kwLower == "smartwatch")
                     {
                         isIntent = true;
-                        sql += " AND (p.CategoryId = 14)";
+                        sql += " AND (p.ID_DANHMUC = 14)";
                     }
                     else
                     {
-                        sql += " AND (p.ProductName LIKE @kw OR p.ProductCode LIKE @kw OR p.Brand LIKE @kw OR p.Specifications LIKE @kw OR c.CategoryName LIKE @kw)";
+                        sql += " AND (p.TEN_SAN_PHAM LIKE @kw OR p.MA_SAN_PHAM LIKE @kw OR p.THUONG_HIEU LIKE @kw OR p.THONG_SO_KY_THUAT LIKE @kw OR c.TEN_DANH_MUC LIKE @kw)";
                     }
                 }
 
                 if (!string.IsNullOrWhiteSpace(brand))
-                    sql += " AND p.Brand = @brand";
+                    sql += " AND p.THUONG_HIEU = @brand";
 
                 if (!string.IsNullOrWhiteSpace(priceRange))
                 {
                     if (priceRange == "under10")
-                        sql += " AND p.Price < 10000000";
+                        sql += " AND p.GIA_BAN < 10000000";
                     else if (priceRange == "10to20")
-                        sql += " AND p.Price >= 10000000 AND p.Price <= 20000000";
+                        sql += " AND p.GIA_BAN >= 10000000 AND p.GIA_BAN <= 20000000";
                     else if (priceRange == "20to30")
-                        sql += " AND p.Price > 20000000 AND p.Price <= 30000000";
+                        sql += " AND p.GIA_BAN > 20000000 AND p.GIA_BAN <= 30000000";
                     else if (priceRange == "over30")
-                        sql += " AND p.Price > 30000000";
+                        sql += " AND p.GIA_BAN > 30000000";
                 }
 
                 if (sortBy == "price_asc")
-                    sql += " ORDER BY p.Price ASC";
+                    sql += " ORDER BY p.GIA_BAN ASC";
                 else if (sortBy == "price_desc")
-                    sql += " ORDER BY p.Price DESC";
+                    sql += " ORDER BY p.GIA_BAN DESC";
                 else if (sortBy == "newest")
-                    sql += " ORDER BY p.CreatedAt DESC, p.ProductId DESC";
+                    sql += " ORDER BY p.NGAY_TAO DESC, p.ID_SANPHAM DESC";
                 else
                 {
                     if (!string.IsNullOrWhiteSpace(kwLower) && !isIntent)
                     {
                         sql += @" ORDER BY 
                             (CASE 
-                                WHEN p.ProductName LIKE @kwStart THEN 100
-                                WHEN p.ProductName LIKE @kw THEN 80
-                                WHEN p.Brand LIKE @kw THEN 60
-                                WHEN c.CategoryName LIKE @kw THEN 50
-                                WHEN p.ProductCode LIKE @kw THEN 40
+                                WHEN p.TEN_SAN_PHAM LIKE @kwStart THEN 100
+                                WHEN p.TEN_SAN_PHAM LIKE @kw THEN 80
+                                WHEN p.THUONG_HIEU LIKE @kw THEN 60
+                                WHEN c.TEN_DANH_MUC LIKE @kw THEN 50
+                                WHEN p.MA_SAN_PHAM LIKE @kw THEN 40
                                 ELSE 20
-                             END) DESC, p.SoldCount DESC, p.ProductId ASC";
+                             END) DESC, p.SO_LUONG_DA_BAN DESC, p.ID_SANPHAM ASC";
                     }
                     else
                     {
-                        sql += " ORDER BY p.SoldCount DESC, p.ProductId ASC";
+                        sql += " ORDER BY p.SO_LUONG_DA_BAN DESC, p.ID_SANPHAM ASC";
                     }
                 }
 
@@ -823,13 +823,13 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("SELECT DISTINCT Brand FROM dbo.SANPHAM WHERE Status = N'Đang kinh doanh' ORDER BY Brand ASC", conn))
+                using (SqlCommand cmd = new SqlCommand("SELECT DISTINCT THUONG_HIEU FROM dbo.SANPHAM WHERE TRANG_THAI = N'Đang kinh doanh' ORDER BY THUONG_HIEU ASC", conn))
                 {
                     using (SqlDataReader r = cmd.ExecuteReader())
                     {
                         while (r.Read())
                         {
-                            brands.Add(Convert.ToString(r["Brand"]));
+                            brands.Add(Convert.ToString(r["THUONG_HIEU"]));
                         }
                     }
                 }
@@ -842,10 +842,10 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT p.*, c.CategoryName
+                string sql = @"SELECT p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
-                               WHERE p.ProductId = @id";
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
+                               WHERE p.ID_SANPHAM = @id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", productId);
@@ -864,11 +864,11 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = string.Format(@"SELECT TOP {0} p.*, c.CategoryName
+                string sql = string.Format(@"SELECT TOP {0} p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
-                               WHERE p.CategoryId = @catId AND p.ProductId <> @exId AND p.Status = N'Đang kinh doanh'
-                               ORDER BY p.SoldCount DESC", top);
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
+                               WHERE p.ID_DANHMUC = @catId AND p.ID_SANPHAM <> @exId AND p.TRANG_THAI = N'Đang kinh doanh'
+                               ORDER BY p.SO_LUONG_DA_BAN DESC", top);
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@catId", categoryId);
@@ -903,7 +903,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE ProductCode = @code AND ProductId <> @id", conn))
+                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE MA_SAN_PHAM = @code AND ID_SANPHAM <> @id", conn))
                 {
                     chk.Parameters.AddWithValue("@code", p.ProductCode.Trim());
                     chk.Parameters.AddWithValue("@id", p.ProductId);
@@ -917,8 +917,8 @@ namespace PCMComputer
                 if (p.ProductId <= 0)
                 {
                     string ins = @"INSERT INTO dbo.SANPHAM (
-                                       ProductCode, ProductName, CategoryId, Brand, OldPrice, Price, StockQuantity,
-                                       WarrantyMonths, ImageUrl, Specifications, Description, PromoCount, IsDeal, Status
+                                       MA_SAN_PHAM, TEN_SAN_PHAM, ID_DANHMUC, THUONG_HIEU, GIA_CU, GIA_BAN, SO_LUONG_TON,
+                                       SO_THANG_BAO_HANH, DUONG_DAN_ANH, THONG_SO_KY_THUAT, MO_TA, SO_UU_DAI, GIA_SOC, TRANG_THAI
                                    ) VALUES (
                                        @code, @name, @cat, @brand, @oldP, @price, @stock,
                                        @war, @img, @spec, @desc, @promo, @deal, @status
@@ -945,10 +945,10 @@ namespace PCMComputer
                 else
                 {
                     string upd = @"UPDATE dbo.SANPHAM
-                                   SET ProductCode = @code, ProductName = @name, CategoryId = @cat, Brand = @brand,
-                                       OldPrice = @oldP, Price = @price, StockQuantity = @stock, WarrantyMonths = @war,
-                                       ImageUrl = @img, Specifications = @spec, Description = @desc, IsDeal = @deal, Status = @status
-                                   WHERE ProductId = @id";
+                                   SET MA_SAN_PHAM = @code, TEN_SAN_PHAM = @name, ID_DANHMUC = @cat, THUONG_HIEU = @brand,
+                                       GIA_CU = @oldP, GIA_BAN = @price, SO_LUONG_TON = @stock, SO_THANG_BAO_HANH = @war,
+                                       DUONG_DAN_ANH = @img, THONG_SO_KY_THUAT = @spec, MO_TA = @desc, GIA_SOC = @deal, TRANG_THAI = @status
+                                   WHERE ID_SANPHAM = @id";
                     using (SqlCommand cmd = new SqlCommand(upd, conn))
                     {
                         cmd.Parameters.AddWithValue("@code", p.ProductCode.Trim());
@@ -985,9 +985,9 @@ namespace PCMComputer
             {
                 conn.Open();
                 string sql = @"UPDATE dbo.SANPHAM
-                               SET Price = @price, StockQuantity = @stock, WarrantyMonths = @war,
-                                   Specifications = @spec, Description = @desc
-                               WHERE ProductId = @id";
+                               SET GIA_BAN = @price, SO_LUONG_TON = @stock, SO_THANG_BAO_HANH = @war,
+                                   THONG_SO_KY_THUAT = @spec, MO_TA = @desc
+                               WHERE ID_SANPHAM = @id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@price", price);
@@ -1011,13 +1011,13 @@ namespace PCMComputer
                 conn.Open();
                 // Ngoại lệ UC09: Nếu sản phẩm đã từng phát sinh trong hóa đơn bán hàng (OrderDetails),
                 // chuyển sang trạng thái 'Ngừng kinh doanh' thay vì xóa cứng để bảo toàn lịch sử đơn hàng.
-                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.CHITIETDONHANG WHERE ProductId = @id", conn))
+                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.CHITIETDONHANG WHERE ID_SANPHAM = @id", conn))
                 {
                     chk.Parameters.AddWithValue("@id", productId);
                     int orderRefCount = Convert.ToInt32(chk.ExecuteScalar());
                     if (orderRefCount > 0)
                     {
-                        using (SqlCommand softCmd = new SqlCommand("UPDATE dbo.SANPHAM SET Status = N'Ngừng kinh doanh' WHERE ProductId = @id", conn))
+                        using (SqlCommand softCmd = new SqlCommand("UPDATE dbo.SANPHAM SET TRANG_THAI = N'Ngừng kinh doanh' WHERE ID_SANPHAM = @id", conn))
                         {
                             softCmd.Parameters.AddWithValue("@id", productId);
                             softCmd.ExecuteNonQuery();
@@ -1028,7 +1028,7 @@ namespace PCMComputer
                     }
                 }
 
-                using (SqlCommand delCmd = new SqlCommand("DELETE FROM dbo.SANPHAM WHERE ProductId = @id", conn))
+                using (SqlCommand delCmd = new SqlCommand("DELETE FROM dbo.SANPHAM WHERE ID_SANPHAM = @id", conn))
                 {
                     delCmd.Parameters.AddWithValue("@id", productId);
                     delCmd.ExecuteNonQuery();
@@ -1041,24 +1041,24 @@ namespace PCMComputer
         private static ProductInfo MapProduct(SqlDataReader r)
         {
             ProductInfo p = new ProductInfo();
-            p.ProductId = Convert.ToInt32(r["ProductId"]);
-            p.ProductCode = Convert.ToString(r["ProductCode"]);
-            p.ProductName = Convert.ToString(r["ProductName"]);
-            p.CategoryId = Convert.ToInt32(r["CategoryId"]);
-            p.CategoryName = r["CategoryName"] != DBNull.Value ? Convert.ToString(r["CategoryName"]) : "";
-            p.Brand = Convert.ToString(r["Brand"]);
-            p.OldPrice = Convert.ToDecimal(r["OldPrice"]);
-            p.Price = Convert.ToDecimal(r["Price"]);
-            p.StockQuantity = Convert.ToInt32(r["StockQuantity"]);
-            p.WarrantyMonths = Convert.ToInt32(r["WarrantyMonths"]);
-            p.ImageUrl = LocalizeAssetPath(Convert.ToString(r["ImageUrl"]));
-            p.Specifications = r["Specifications"] != DBNull.Value ? Convert.ToString(r["Specifications"]) : "";
-            p.Description = r["Description"] != DBNull.Value ? Convert.ToString(r["Description"]) : "";
-            p.PromoCount = Convert.ToInt32(r["PromoCount"]);
-            p.IsDeal = Convert.ToBoolean(r["IsDeal"]);
-            p.SoldCount = Convert.ToInt32(r["SoldCount"]);
-            p.Status = Convert.ToString(r["Status"]);
-            p.CreatedAt = Convert.ToDateTime(r["CreatedAt"]);
+            p.ProductId = Convert.ToInt32(r["ID_SANPHAM"]);
+            p.ProductCode = Convert.ToString(r["MA_SAN_PHAM"]);
+            p.ProductName = Convert.ToString(r["TEN_SAN_PHAM"]);
+            p.CategoryId = Convert.ToInt32(r["ID_DANHMUC"]);
+            p.CategoryName = r["TEN_DANH_MUC"] != DBNull.Value ? Convert.ToString(r["TEN_DANH_MUC"]) : "";
+            p.Brand = Convert.ToString(r["THUONG_HIEU"]);
+            p.OldPrice = Convert.ToDecimal(r["GIA_CU"]);
+            p.Price = Convert.ToDecimal(r["GIA_BAN"]);
+            p.StockQuantity = Convert.ToInt32(r["SO_LUONG_TON"]);
+            p.WarrantyMonths = Convert.ToInt32(r["SO_THANG_BAO_HANH"]);
+            p.ImageUrl = LocalizeAssetPath(Convert.ToString(r["DUONG_DAN_ANH"]));
+            p.Specifications = r["THONG_SO_KY_THUAT"] != DBNull.Value ? Convert.ToString(r["THONG_SO_KY_THUAT"]) : "";
+            p.Description = r["MO_TA"] != DBNull.Value ? Convert.ToString(r["MO_TA"]) : "";
+            p.PromoCount = Convert.ToInt32(r["SO_UU_DAI"]);
+            p.IsDeal = Convert.ToBoolean(r["GIA_SOC"]);
+            p.SoldCount = Convert.ToInt32(r["SO_LUONG_DA_BAN"]);
+            p.Status = Convert.ToString(r["TRANG_THAI"]);
+            p.CreatedAt = Convert.ToDateTime(r["NGAY_TAO"]);
             return p;
         }
 
@@ -1073,8 +1073,8 @@ namespace PCMComputer
                 conn.Open();
                 string sql = "SELECT * FROM dbo.KHUYENMAI";
                 if (activeOnly)
-                    sql += " WHERE IsActive = 1 AND EndDate >= GETDATE()";
-                sql += " ORDER BY PromotionId DESC";
+                    sql += " WHERE DANG_HOAT_DONG = 1 AND NGAY_KET_THUC >= GETDATE()";
+                sql += " ORDER BY ID_KHUYENMAI DESC";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     using (SqlDataReader r = cmd.ExecuteReader())
@@ -1101,7 +1101,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = "SELECT TOP 1 * FROM dbo.KHUYENMAI WHERE VoucherCode = @code";
+                string sql = "SELECT TOP 1 * FROM dbo.KHUYENMAI WHERE MA_GIAM_GIA = @code";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@code", voucherCode.Trim().ToUpper());
@@ -1201,7 +1201,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.KHUYENMAI WHERE VoucherCode = @code AND PromotionId <> @id", conn))
+                using (SqlCommand chk = new SqlCommand("SELECT COUNT(*) FROM dbo.KHUYENMAI WHERE MA_GIAM_GIA = @code AND ID_KHUYENMAI <> @id", conn))
                 {
                     chk.Parameters.AddWithValue("@code", promo.VoucherCode.Trim().ToUpper());
                     chk.Parameters.AddWithValue("@id", promo.PromotionId);
@@ -1215,8 +1215,8 @@ namespace PCMComputer
                 if (promo.PromotionId <= 0)
                 {
                     string ins = @"INSERT INTO dbo.KHUYENMAI (
-                                       PromotionName, VoucherCode, DiscountType, DiscountValue, MinOrderAmount,
-                                       MaxDiscountAmount, UsageLimit, UsedCount, StartDate, EndDate, Description, IsActive
+                                       TEN_KHUYEN_MAI, MA_GIAM_GIA, LOAI_GIAM_GIA, MUC_GIAM_GIA, GIA_TRI_DON_TOI_THIEU,
+                                       MUC_GIAM_TOI_DA, GIOI_HAN_SU_DUNG, SO_LUOT_DA_DUNG, NGAY_BAT_DAU, NGAY_KET_THUC, MO_TA, DANG_HOAT_DONG
                                    ) VALUES (
                                        @name, @code, @type, @val, @min, @max, @limit, 0, @start, @end, @desc, @act
                                    )";
@@ -1239,10 +1239,10 @@ namespace PCMComputer
                 else
                 {
                     string upd = @"UPDATE dbo.KHUYENMAI
-                                   SET PromotionName = @name, VoucherCode = @code, DiscountType = @type, DiscountValue = @val,
-                                       MinOrderAmount = @min, MaxDiscountAmount = @max, UsageLimit = @limit,
-                                       StartDate = @start, EndDate = @end, Description = @desc, IsActive = @act
-                                   WHERE PromotionId = @id";
+                                   SET TEN_KHUYEN_MAI = @name, MA_GIAM_GIA = @code, LOAI_GIAM_GIA = @type, MUC_GIAM_GIA = @val,
+                                       GIA_TRI_DON_TOI_THIEU = @min, MUC_GIAM_TOI_DA = @max, GIOI_HAN_SU_DUNG = @limit,
+                                       NGAY_BAT_DAU = @start, NGAY_KET_THUC = @end, MO_TA = @desc, DANG_HOAT_DONG = @act
+                                   WHERE ID_KHUYENMAI = @id";
                     using (SqlCommand cmd = new SqlCommand(upd, conn))
                     {
                         cmd.Parameters.AddWithValue("@name", promo.PromotionName.Trim());
@@ -1267,19 +1267,19 @@ namespace PCMComputer
         private static PromotionInfo MapPromotion(SqlDataReader r)
         {
             PromotionInfo p = new PromotionInfo();
-            p.PromotionId = Convert.ToInt32(r["PromotionId"]);
-            p.PromotionName = Convert.ToString(r["PromotionName"]);
-            p.VoucherCode = Convert.ToString(r["VoucherCode"]);
-            p.DiscountType = Convert.ToString(r["DiscountType"]);
-            p.DiscountValue = Convert.ToDecimal(r["DiscountValue"]);
-            p.MinOrderAmount = Convert.ToDecimal(r["MinOrderAmount"]);
-            p.MaxDiscountAmount = Convert.ToDecimal(r["MaxDiscountAmount"]);
-            p.UsageLimit = Convert.ToInt32(r["UsageLimit"]);
-            p.UsedCount = Convert.ToInt32(r["UsedCount"]);
-            p.StartDate = Convert.ToDateTime(r["StartDate"]);
-            p.EndDate = Convert.ToDateTime(r["EndDate"]);
-            p.Description = r["Description"] != DBNull.Value ? Convert.ToString(r["Description"]) : "";
-            p.IsActive = Convert.ToBoolean(r["IsActive"]);
+            p.PromotionId = Convert.ToInt32(r["ID_KHUYENMAI"]);
+            p.PromotionName = Convert.ToString(r["TEN_KHUYEN_MAI"]);
+            p.VoucherCode = Convert.ToString(r["MA_GIAM_GIA"]);
+            p.DiscountType = Convert.ToString(r["LOAI_GIAM_GIA"]);
+            p.DiscountValue = Convert.ToDecimal(r["MUC_GIAM_GIA"]);
+            p.MinOrderAmount = Convert.ToDecimal(r["GIA_TRI_DON_TOI_THIEU"]);
+            p.MaxDiscountAmount = Convert.ToDecimal(r["MUC_GIAM_TOI_DA"]);
+            p.UsageLimit = Convert.ToInt32(r["GIOI_HAN_SU_DUNG"]);
+            p.UsedCount = Convert.ToInt32(r["SO_LUOT_DA_DUNG"]);
+            p.StartDate = Convert.ToDateTime(r["NGAY_BAT_DAU"]);
+            p.EndDate = Convert.ToDateTime(r["NGAY_KET_THUC"]);
+            p.Description = r["MO_TA"] != DBNull.Value ? Convert.ToString(r["MO_TA"]) : "";
+            p.IsActive = Convert.ToBoolean(r["DANG_HOAT_DONG"]);
             return p;
         }
 
@@ -1292,11 +1292,11 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT o.*, u.Username AS CustomerUsername
+                string sql = @"SELECT o.*, u.TEN_DANG_NHAP AS CustomerUsername
                                FROM dbo.DONHANG o
-                               INNER JOIN dbo.TAIKHOAN u ON o.UserId = u.UserId
-                               WHERE o.UserId = @uid
-                               ORDER BY o.OrderId DESC";
+                               INNER JOIN dbo.TAIKHOAN u ON o.ID_TAIKHOAN = u.ID_TAIKHOAN
+                               WHERE o.ID_TAIKHOAN = @uid
+                               ORDER BY o.ID_DONHANG DESC";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@uid", userId);
@@ -1324,15 +1324,15 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT o.*, u.Username AS CustomerUsername
+                string sql = @"SELECT o.*, u.TEN_DANG_NHAP AS CustomerUsername
                                FROM dbo.DONHANG o
-                               INNER JOIN dbo.TAIKHOAN u ON o.UserId = u.UserId
+                               INNER JOIN dbo.TAIKHOAN u ON o.ID_TAIKHOAN = u.ID_TAIKHOAN
                                WHERE 1=1";
                 if (!string.IsNullOrWhiteSpace(statusFilter))
-                    sql += " AND o.OrderStatus = @st";
+                    sql += " AND o.TRANG_THAI_DON_HANG = @st";
                 if (!string.IsNullOrWhiteSpace(keyword))
-                    sql += " AND (o.OrderCode LIKE @kw OR o.ReceiverName LIKE @kw OR o.ReceiverPhone LIKE @kw OR u.Username LIKE @kw)";
-                sql += " ORDER BY o.OrderId DESC";
+                    sql += " AND (o.MA_DON_HANG LIKE @kw OR o.TEN_NGUOI_NHAN LIKE @kw OR o.DIEN_THOAI_NGUOI_NHAN LIKE @kw OR u.TEN_DANG_NHAP LIKE @kw)";
+                sql += " ORDER BY o.ID_DONHANG DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -1363,10 +1363,10 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT o.*, u.Username AS CustomerUsername
+                string sql = @"SELECT o.*, u.TEN_DANG_NHAP AS CustomerUsername
                                FROM dbo.DONHANG o
-                               INNER JOIN dbo.TAIKHOAN u ON o.UserId = u.UserId
-                               WHERE o.OrderId = @id";
+                               INNER JOIN dbo.TAIKHOAN u ON o.ID_TAIKHOAN = u.ID_TAIKHOAN
+                               WHERE o.ID_DONHANG = @id";
                 OrderInfo ord = null;
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -1389,7 +1389,7 @@ namespace PCMComputer
         private static List<OrderDetailInfo> GetOrderDetails(SqlConnection conn, int orderId)
         {
             List<OrderDetailInfo> details = new List<OrderDetailInfo>();
-            string sql = "SELECT * FROM dbo.CHITIETDONHANG WHERE OrderId = @oid ORDER BY OrderDetailId ASC";
+            string sql = "SELECT * FROM dbo.CHITIETDONHANG WHERE ID_DONHANG = @oid ORDER BY ID_CHITIETDONHANG ASC";
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@oid", orderId);
@@ -1398,15 +1398,15 @@ namespace PCMComputer
                     while (r.Read())
                     {
                         OrderDetailInfo d = new OrderDetailInfo();
-                        d.OrderDetailId = Convert.ToInt32(r["OrderDetailId"]);
-                        d.OrderId = Convert.ToInt32(r["OrderId"]);
-                        d.ProductId = Convert.ToInt32(r["ProductId"]);
-                        d.ProductCode = Convert.ToString(r["ProductCode"]);
-                        d.ProductName = Convert.ToString(r["ProductName"]);
-                        d.ImageUrl = r["ImageUrl"] != DBNull.Value ? LocalizeAssetPath(Convert.ToString(r["ImageUrl"])) : "./anh pc/pc1.png";
-                        d.UnitPrice = Convert.ToDecimal(r["UnitPrice"]);
-                        d.Quantity = Convert.ToInt32(r["Quantity"]);
-                        d.LineTotal = Convert.ToDecimal(r["LineTotal"]);
+                        d.OrderDetailId = Convert.ToInt32(r["ID_CHITIETDONHANG"]);
+                        d.OrderId = Convert.ToInt32(r["ID_DONHANG"]);
+                        d.ProductId = Convert.ToInt32(r["ID_SANPHAM"]);
+                        d.ProductCode = Convert.ToString(r["MA_SAN_PHAM"]);
+                        d.ProductName = Convert.ToString(r["TEN_SAN_PHAM"]);
+                        d.ImageUrl = r["DUONG_DAN_ANH"] != DBNull.Value ? LocalizeAssetPath(Convert.ToString(r["DUONG_DAN_ANH"])) : "./anh pc/pc1.png";
+                        d.UnitPrice = Convert.ToDecimal(r["DON_GIA"]);
+                        d.Quantity = Convert.ToInt32(r["SO_LUONG"]);
+                        d.LineTotal = Convert.ToDecimal(r["THANH_TIEN"]);
                         details.Add(d);
                     }
                 }
@@ -1417,7 +1417,7 @@ namespace PCMComputer
         private static List<OrderHistoryInfo> GetOrderHistory(SqlConnection conn, int orderId)
         {
             List<OrderHistoryInfo> list = new List<OrderHistoryInfo>();
-            string sql = "SELECT * FROM dbo.LICHSUTRANGTHAIDONHANG WHERE OrderId = @oid ORDER BY HistoryId DESC";
+            string sql = "SELECT * FROM dbo.LICHSUTRANGTHAIDONHANG WHERE ID_DONHANG = @oid ORDER BY ID_LICHSU DESC";
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@oid", orderId);
@@ -1426,12 +1426,12 @@ namespace PCMComputer
                     while (r.Read())
                     {
                         OrderHistoryInfo h = new OrderHistoryInfo();
-                        h.HistoryId = Convert.ToInt32(r["HistoryId"]);
-                        h.OrderId = Convert.ToInt32(r["OrderId"]);
-                        h.Status = Convert.ToString(r["Status"]);
-                        h.Note = r["Note"] != DBNull.Value ? Convert.ToString(r["Note"]) : "";
-                        h.UpdatedBy = r["UpdatedBy"] != DBNull.Value ? Convert.ToString(r["UpdatedBy"]) : "";
-                        h.UpdatedAt = Convert.ToDateTime(r["UpdatedAt"]);
+                        h.HistoryId = Convert.ToInt32(r["ID_LICHSU"]);
+                        h.OrderId = Convert.ToInt32(r["ID_DONHANG"]);
+                        h.Status = Convert.ToString(r["TRANG_THAI"]);
+                        h.Note = r["GHI_CHU"] != DBNull.Value ? Convert.ToString(r["GHI_CHU"]) : "";
+                        h.UpdatedBy = r["NGUOI_CAP_NHAT"] != DBNull.Value ? Convert.ToString(r["NGUOI_CAP_NHAT"]) : "";
+                        h.UpdatedAt = Convert.ToDateTime(r["NGAY_CAP_NHAT"]);
                         list.Add(h);
                     }
                 }
@@ -1449,7 +1449,7 @@ namespace PCMComputer
                 try
                 {
                     string currentStatus = "";
-                    using (SqlCommand getCmd = new SqlCommand("SELECT OrderStatus FROM dbo.DONHANG WHERE OrderId = @id", conn, tran))
+                    using (SqlCommand getCmd = new SqlCommand("SELECT TRANG_THAI_DON_HANG FROM dbo.DONHANG WHERE ID_DONHANG = @id", conn, tran))
                     {
                         getCmd.Parameters.AddWithValue("@id", orderId);
                         object val = getCmd.ExecuteScalar();
@@ -1494,7 +1494,7 @@ namespace PCMComputer
 
                         // Tự động hoàn trả số lượng tồn kho cho tất cả sản phẩm trong đơn
                         List<OrderDetailInfo> items = new List<OrderDetailInfo>();
-                        using (SqlCommand dCmd = new SqlCommand("SELECT ProductId, Quantity FROM dbo.CHITIETDONHANG WHERE OrderId = @id", conn, tran))
+                        using (SqlCommand dCmd = new SqlCommand("SELECT ID_SANPHAM, SO_LUONG FROM dbo.CHITIETDONHANG WHERE ID_DONHANG = @id", conn, tran))
                         {
                             dCmd.Parameters.AddWithValue("@id", orderId);
                             using (SqlDataReader r = dCmd.ExecuteReader())
@@ -1502,8 +1502,8 @@ namespace PCMComputer
                                 while (r.Read())
                                 {
                                     OrderDetailInfo di = new OrderDetailInfo();
-                                    di.ProductId = Convert.ToInt32(r["ProductId"]);
-                                    di.Quantity = Convert.ToInt32(r["Quantity"]);
+                                    di.ProductId = Convert.ToInt32(r["ID_SANPHAM"]);
+                                    di.Quantity = Convert.ToInt32(r["SO_LUONG"]);
                                     items.Add(di);
                                 }
                             }
@@ -1512,9 +1512,9 @@ namespace PCMComputer
                         for (int i = 0; i < items.Count; i++)
                         {
                             string restoreSql = @"UPDATE dbo.SANPHAM
-                                                  SET StockQuantity = StockQuantity + @qty,
-                                                      SoldCount = CASE WHEN SoldCount >= @qty THEN SoldCount - @qty ELSE 0 END
-                                                  WHERE ProductId = @pid";
+                                                  SET SO_LUONG_TON = SO_LUONG_TON + @qty,
+                                                      SO_LUONG_DA_BAN = CASE WHEN SO_LUONG_DA_BAN >= @qty THEN SO_LUONG_DA_BAN - @qty ELSE 0 END
+                                                  WHERE ID_SANPHAM = @pid";
                             using (SqlCommand rCmd = new SqlCommand(restoreSql, conn, tran))
                             {
                                 rCmd.Parameters.AddWithValue("@qty", items[i].Quantity);
@@ -1524,14 +1524,14 @@ namespace PCMComputer
                         }
                     }
 
-                    using (SqlCommand updCmd = new SqlCommand("UPDATE dbo.DONHANG SET OrderStatus = @st, UpdatedAt = GETDATE() WHERE OrderId = @id", conn, tran))
+                    using (SqlCommand updCmd = new SqlCommand("UPDATE dbo.DONHANG SET TRANG_THAI_DON_HANG = @st, NGAY_CAP_NHAT = GETDATE() WHERE ID_DONHANG = @id", conn, tran))
                     {
                         updCmd.Parameters.AddWithValue("@st", newStatus);
                         updCmd.Parameters.AddWithValue("@id", orderId);
                         updCmd.ExecuteNonQuery();
                     }
 
-                    using (SqlCommand histCmd = new SqlCommand("INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (OrderId, Status, Note, UpdatedBy) VALUES (@id, @st, @note, @by)", conn, tran))
+                    using (SqlCommand histCmd = new SqlCommand("INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (ID_DONHANG, TRANG_THAI, GHI_CHU, NGUOI_CAP_NHAT) VALUES (@id, @st, @note, @by)", conn, tran))
                     {
                         histCmd.Parameters.AddWithValue("@id", orderId);
                         histCmd.Parameters.AddWithValue("@st", newStatus);
@@ -1564,19 +1564,19 @@ namespace PCMComputer
                 conn.Open();
                 string dateFilter = "";
                 if (fromDate.HasValue)
-                    dateFilter += " AND CreatedAt >= @from";
+                    dateFilter += " AND NGAY_TAO >= @from";
                 if (toDate.HasValue)
-                    dateFilter += " AND CreatedAt <= @to";
+                    dateFilter += " AND NGAY_TAO <= @to";
 
                 // Doanh thu thực tế tính từ các đơn hàng có trạng thái 'Đã giao' (UC14)
                 string sql = string.Format(@"
                     SELECT
-                        ISNULL(SUM(CASE WHEN OrderStatus = N'Đã giao' THEN TotalAmount ELSE 0 END), 0) AS TotalRevenue,
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG = N'Đã giao' THEN TONG_TIEN ELSE 0 END), 0) AS TotalRevenue,
                         COUNT(*) AS TotalOrders,
-                        ISNULL(SUM(CASE WHEN OrderStatus = N'Đã giao' THEN 1 ELSE 0 END), 0) AS DeliveredOrders,
-                        ISNULL(SUM(CASE WHEN OrderStatus IN (N'Chờ xác nhận', N'Đang chờ vận chuyển') THEN 1 ELSE 0 END), 0) AS PendingOrders,
-                        ISNULL(SUM(CASE WHEN OrderStatus IN (N'Đang vận chuyển', N'Đang giao') THEN 1 ELSE 0 END), 0) AS ShippingOrders,
-                        ISNULL(SUM(CASE WHEN OrderStatus = N'Đã hủy' THEN 1 ELSE 0 END), 0) AS CancelledOrders
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG = N'Đã giao' THEN 1 ELSE 0 END), 0) AS DeliveredOrders,
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG IN (N'Chờ xác nhận', N'Đang chờ vận chuyển') THEN 1 ELSE 0 END), 0) AS PendingOrders,
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG IN (N'Đang vận chuyển', N'Đang giao') THEN 1 ELSE 0 END), 0) AS ShippingOrders,
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG = N'Đã hủy' THEN 1 ELSE 0 END), 0) AS CancelledOrders
                     FROM dbo.DONHANG
                     WHERE 1=1 {0}", dateFilter);
 
@@ -1598,7 +1598,7 @@ namespace PCMComputer
                     }
                 }
 
-                using (SqlCommand lowCmd = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE Status = N'Đang kinh doanh' AND StockQuantity <= 5", conn))
+                using (SqlCommand lowCmd = new SqlCommand("SELECT COUNT(*) FROM dbo.SANPHAM WHERE TRANG_THAI = N'Đang kinh doanh' AND SO_LUONG_TON <= 5", conn))
                 {
                     stats.LowStockCount = Convert.ToInt32(lowCmd.ExecuteScalar());
                 }
@@ -1612,11 +1612,11 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"SELECT p.*, c.CategoryName
+                string sql = @"SELECT p.*, c.TEN_DANH_MUC
                                FROM dbo.SANPHAM p
-                               INNER JOIN dbo.DANHMUC c ON p.CategoryId = c.CategoryId
-                               WHERE p.Status = N'Đang kinh doanh' AND p.StockQuantity <= @th
-                               ORDER BY p.StockQuantity ASC";
+                               INNER JOIN dbo.DANHMUC c ON p.ID_DANHMUC = c.ID_DANHMUC
+                               WHERE p.TRANG_THAI = N'Đang kinh doanh' AND p.SO_LUONG_TON <= @th
+                               ORDER BY p.SO_LUONG_TON ASC";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@th", threshold);
@@ -1637,14 +1637,14 @@ namespace PCMComputer
                 conn.Open();
                 string sql = @"
                     SELECT 
-                        CONVERT(VARCHAR(10), CreatedAt, 120) AS DayDate,
-                        ISNULL(SUM(CASE WHEN OrderStatus = N'Đã giao' THEN TotalAmount ELSE 0 END), 0) AS Revenue,
+                        CONVERT(VARCHAR(10), NGAY_TAO, 120) AS DayDate,
+                        ISNULL(SUM(CASE WHEN TRANG_THAI_DON_HANG = N'Đã giao' THEN TONG_TIEN ELSE 0 END), 0) AS Revenue,
                         COUNT(*) AS OrderCount
                     FROM dbo.DONHANG
                     WHERE 1=1";
-                if (fromDate.HasValue) sql += " AND CreatedAt >= @from";
-                if (toDate.HasValue) sql += " AND CreatedAt <= @to";
-                sql += @" GROUP BY CONVERT(VARCHAR(10), CreatedAt, 120)
+                if (fromDate.HasValue) sql += " AND NGAY_TAO >= @from";
+                if (toDate.HasValue) sql += " AND NGAY_TAO <= @to";
+                sql += @" GROUP BY CONVERT(VARCHAR(10), NGAY_TAO, 120)
                           ORDER BY DayDate ASC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -1680,14 +1680,14 @@ namespace PCMComputer
                 conn.Open();
                 string sql = @"
                     SELECT 
-                        c.CategoryName,
-                        ISNULL(SUM(od.LineTotal), 0) AS TotalRevenue,
-                        ISNULL(SUM(od.Quantity), 0) AS TotalSold
+                        c.TEN_DANH_MUC,
+                        ISNULL(SUM(od.THANH_TIEN), 0) AS TotalRevenue,
+                        ISNULL(SUM(od.SO_LUONG), 0) AS TotalSold
                     FROM dbo.DANHMUC c
-                    LEFT JOIN dbo.SANPHAM p ON c.CategoryId = p.CategoryId
-                    LEFT JOIN dbo.CHITIETDONHANG od ON p.ProductId = od.ProductId
-                    GROUP BY c.CategoryName
-                    HAVING ISNULL(SUM(od.Quantity), 0) > 0 OR c.CategoryName IN (N'Laptop Gaming - Đồ Họa', N'PC Gaming - Học Tập', N'Linh Kiện Máy Tính', N'Màn Hình, Máy In', N'Laptop - Máy Tính Xách Tay')
+                    LEFT JOIN dbo.SANPHAM p ON c.ID_DANHMUC = p.ID_DANHMUC
+                    LEFT JOIN dbo.CHITIETDONHANG od ON p.ID_SANPHAM = od.ID_SANPHAM
+                    GROUP BY c.TEN_DANH_MUC
+                    HAVING ISNULL(SUM(od.SO_LUONG), 0) > 0 OR c.TEN_DANH_MUC IN (N'Laptop Gaming - Đồ Họa', N'PC Gaming - Học Tập', N'Linh Kiện Máy Tính', N'Màn Hình, Máy In', N'Laptop - Máy Tính Xách Tay')
                     ORDER BY TotalRevenue DESC";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -1696,7 +1696,7 @@ namespace PCMComputer
                         while (r.Read())
                         {
                             CategoryRevenueItem item = new CategoryRevenueItem();
-                            item.CategoryName = Convert.ToString(r["CategoryName"]);
+                            item.CategoryName = Convert.ToString(r["TEN_DANH_MUC"]);
                             item.TotalRevenue = Convert.ToDecimal(r["TotalRevenue"]);
                             item.TotalSold = Convert.ToInt32(r["TotalSold"]);
                             list.Add(item);
@@ -1715,11 +1715,11 @@ namespace PCMComputer
                 conn.Open();
                 string sql = @"
                     SELECT 
-                        OrderStatus,
+                        TRANG_THAI_DON_HANG,
                         COUNT(*) AS Cnt,
-                        ISNULL(SUM(TotalAmount), 0) AS TotalAmt
+                        ISNULL(SUM(TONG_TIEN), 0) AS TotalAmt
                     FROM dbo.DONHANG
-                    GROUP BY OrderStatus
+                    GROUP BY TRANG_THAI_DON_HANG
                     ORDER BY Cnt DESC";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -1728,7 +1728,7 @@ namespace PCMComputer
                         while (r.Read())
                         {
                             OrderStatusItem item = new OrderStatusItem();
-                            item.StatusName = Convert.ToString(r["OrderStatus"]);
+                            item.StatusName = Convert.ToString(r["TRANG_THAI_DON_HANG"]);
                             item.Count = Convert.ToInt32(r["Cnt"]);
                             item.TotalAmount = Convert.ToDecimal(r["TotalAmt"]);
                             if (item.StatusName == "Đã giao") item.ColorHex = "#10b981";
@@ -1750,7 +1750,7 @@ namespace PCMComputer
             using (SqlConnection conn = GetConnection())
             {
                 conn.Open();
-                string sql = @"INSERT INTO dbo.LIENHE (FullName, Phone, Email, Title, Content)
+                string sql = @"INSERT INTO dbo.LIENHE (HO_TEN, SO_DIEN_THOAI, THU_DIEN_TU, TIEU_DE, NOI_DUNG)
                                VALUES (@fn, @ph, @em, @ti, @co)";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -1767,22 +1767,22 @@ namespace PCMComputer
         private static OrderInfo MapOrder(SqlDataReader r)
         {
             OrderInfo o = new OrderInfo();
-            o.OrderId = Convert.ToInt32(r["OrderId"]);
-            o.OrderCode = Convert.ToString(r["OrderCode"]);
-            o.UserId = Convert.ToInt32(r["UserId"]);
+            o.OrderId = Convert.ToInt32(r["ID_DONHANG"]);
+            o.OrderCode = Convert.ToString(r["MA_DON_HANG"]);
+            o.UserId = Convert.ToInt32(r["ID_TAIKHOAN"]);
             o.CustomerUsername = r["CustomerUsername"] != DBNull.Value ? Convert.ToString(r["CustomerUsername"]) : "";
-            o.ReceiverName = Convert.ToString(r["ReceiverName"]);
-            o.ReceiverPhone = Convert.ToString(r["ReceiverPhone"]);
-            o.ShippingAddress = Convert.ToString(r["ShippingAddress"]);
-            o.Note = r["Note"] != DBNull.Value ? Convert.ToString(r["Note"]) : "";
-            o.PaymentMethod = Convert.ToString(r["PaymentMethod"]);
-            o.SubTotal = Convert.ToDecimal(r["SubTotal"]);
-            o.VoucherCode = r["VoucherCode"] != DBNull.Value ? Convert.ToString(r["VoucherCode"]) : "";
-            o.DiscountAmount = Convert.ToDecimal(r["DiscountAmount"]);
-            o.TotalAmount = Convert.ToDecimal(r["TotalAmount"]);
-            o.OrderStatus = Convert.ToString(r["OrderStatus"]);
-            o.CreatedAt = Convert.ToDateTime(r["CreatedAt"]);
-            o.UpdatedAt = Convert.ToDateTime(r["UpdatedAt"]);
+            o.ReceiverName = Convert.ToString(r["TEN_NGUOI_NHAN"]);
+            o.ReceiverPhone = Convert.ToString(r["DIEN_THOAI_NGUOI_NHAN"]);
+            o.ShippingAddress = Convert.ToString(r["DIA_CHI_GIAO_HANG"]);
+            o.Note = r["GHI_CHU"] != DBNull.Value ? Convert.ToString(r["GHI_CHU"]) : "";
+            o.PaymentMethod = Convert.ToString(r["PHUONG_THUC_THANH_TOAN"]);
+            o.SubTotal = Convert.ToDecimal(r["TAM_TINH"]);
+            o.VoucherCode = r["MA_GIAM_GIA"] != DBNull.Value ? Convert.ToString(r["MA_GIAM_GIA"]) : "";
+            o.DiscountAmount = Convert.ToDecimal(r["SO_TIEN_GIAM"]);
+            o.TotalAmount = Convert.ToDecimal(r["TONG_TIEN"]);
+            o.OrderStatus = Convert.ToString(r["TRANG_THAI_DON_HANG"]);
+            o.CreatedAt = Convert.ToDateTime(r["NGAY_TAO"]);
+            o.UpdatedAt = Convert.ToDateTime(r["NGAY_CAP_NHAT"]);
             return o;
         }
     }

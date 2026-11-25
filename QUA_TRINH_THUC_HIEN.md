@@ -21,11 +21,11 @@ Tài liệu này ghi nhận chi tiết toàn bộ quá trình phân tích, thi�
 ### 1.1. Công việc đã thực hiện
 - Kết nối trực tiếp tới SQL Server Express (`.\SQLEXPRESS`) đang chạy trên máy.
 - Xây dựng kịch bản SQL [`csdl_PCMComputer.sql`](file:///d:/WEB/csdl_PCMComputer.sql) khởi tạo CSDL **`PCMComputerDB`** gồm 8 bảng chuẩn hóa với đầy đủ khóa chính (`PRIMARY KEY`), khóa ngoại (`FOREIGN KEY`), và ràng buộc kiểm tra dữ liệu (`CHECK CONSTRAINT`):
-  1. `dbo.TAIKHOAN`: Lưu tài khoản người dùng với mật khẩu băm SHA-256 (`PasswordHash`), phân quyền `Role` (`Admin`, `Staff`, `Customer`), trạng thái khóa `IsLocked`.
+  1. `dbo.TAIKHOAN`: Lưu tài khoản người dùng với mật khẩu băm SHA-256 (`MA_BAM_MAT_KHAU`), phân quyền `VAI_TRO` (`Admin`, `Staff`, `Customer`), trạng thái khóa `BI_KHOA`.
   2. `dbo.DANHMUC`: Lưu 14 danh mục máy tính, laptop, PC gaming, workstation, linh kiện, màn hình, phụ kiện khớp với hệ thống menu của website.
-  3. `dbo.SANPHAM`: Lưu 27 sản phẩm máy tính và linh kiện có đầy đủ mã SP (`ProductCode`), hãng (`Brand`), giá niêm yết (`OldPrice`), giá bán (`Price`), tồn kho (`StockQuantity >= 0`), bảo hành (`WarrantyMonths`), bảng thông số kỹ thuật (`Specifications`), trạng thái (`Đang kinh doanh` / `Ngừng kinh doanh`).
-  4. `dbo.KHUYENMAI`: Lưu chương trình khuyến mãi & mã giảm giá (`VoucherCode`), loại giảm (`PERCENT` hoặc `AMOUNT`), đơn tối thiểu (`MinOrderAmount`), giới hạn lượt dùng (`UsageLimit`, `UsedCount`), ngày bắt đầu/kết thúc (`EndDate >= StartDate`).
-  5. `dbo.DONHANG`: Lưu đơn đặt hàng trực tuyến với mã đơn (`OrderCode`), thông tin người nhận, phương thức thanh toán (`COD`), mã voucher, tiền giảm, tổng thanh toán và trạng thái (`Chờ xác nhận`, `Đang chờ vận chuyển`, `Đang vận chuyển`, `Đang giao`, `Đã giao`, `Đã hủy`).
+  3. `dbo.SANPHAM`: Lưu 27 sản phẩm máy tính và linh kiện có đầy đủ mã SP (`MA_SAN_PHAM`), hãng (`THUONG_HIEU`), giá niêm yết (`GIA_CU`), giá bán (`GIA_BAN`), tồn kho (`SO_LUONG_TON >= 0`), bảo hành (`SO_THANG_BAO_HANH`), bảng thông số kỹ thuật (`THONG_SO_KY_THUAT`), trạng thái (`Đang kinh doanh` / `Ngừng kinh doanh`).
+  4. `dbo.KHUYENMAI`: Lưu chương trình khuyến mãi & mã giảm giá (`MA_GIAM_GIA`), loại giảm (`PERCENT` hoặc `AMOUNT`), đơn tối thiểu (`GIA_TRI_DON_TOI_THIEU`), giới hạn lượt dùng (`GIOI_HAN_SU_DUNG`, `SO_LUOT_DA_DUNG`), ngày bắt đầu/kết thúc (`NGAY_KET_THUC >= StartDate`).
+  5. `dbo.DONHANG`: Lưu đơn đặt hàng trực tuyến với mã đơn (`MA_DON_HANG`), thông tin người nhận, phương thức thanh toán (`COD`), mã voucher, tiền giảm, tổng thanh toán và trạng thái (`Chờ xác nhận`, `Đang chờ vận chuyển`, `Đang vận chuyển`, `Đang giao`, `Đã giao`, `Đã hủy`).
   6. `dbo.CHITIETDONHANG`: Lưu chi tiết từng linh kiện/máy tính trong đơn hàng.
   7. `dbo.LICHSUTRANGTHAIDONHANG`: Lưu vết lịch sử cập nhật trạng thái đơn hàng của Khách hàng / Nhân viên / Quản trị viên.
   8. `dbo.LIENHE`: Lưu thông tin liên hệ & yêu cầu hỗ trợ từ khách hàng.

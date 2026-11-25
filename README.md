@@ -25,8 +25,7 @@ Xem nhật ký chi tiết quá trình xây dựng và kiểm thử tại: **[`QU
 
 ## 2. Khởi tạo Cơ sở dữ liệu SQL Server
 
-- Cài mới bằng [csdl_PCMComputer.sql](csdl_PCMComputer.sql) trong SQL Server Management Studio. Tệp này sẽ xóa cơ sở dữ liệu `PCMComputerDB` hiện có trước khi tạo lại.
-- Nếu đã có dữ liệu từ phiên bản dùng tên bảng tiếng Anh, chạy [csdl_doi_ten_bang.sql](csdl_doi_ten_bang.sql) để đổi tên bảng và giữ dữ liệu.
+- Chạy [csdl_PCMComputer.sql](csdl_PCMComputer.sql) trong SQL Server Management Studio. Tệp này tạo bảng và nạp dữ liệu mẫu khi cơ sở dữ liệu trống. Với cơ sở dữ liệu phiên bản cũ, tệp đổi tên bảng và cột tại chỗ để giữ dữ liệu.
 
 ---
 

@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- CƠ SỞ DỮ LIỆU: PCMComputerDB (Hệ thống Website Bán Máy Tính và Linh Kiện)
 -- Hệ quản trị CSDL: Microsoft SQL Server (.\SQLEXPRESS)
 -- Bám sát tài liệu đặc tả: Website-Laptop-Linh-Kien.docx (FR01 - FR16, UC01 - UC16)
@@ -7,176 +7,443 @@
 USE master;
 GO
 
--- Khởi tạo lại dữ liệu mẫu: phần dưới xóa cơ sở dữ liệu hiện có trước khi tạo mới.
-IF DB_ID('PCMComputerDB') IS NOT NULL
+IF DB_ID(N'PCMComputerDB') IS NULL
+    EXEC(N'CREATE DATABASE [PCMComputerDB]');
+GO
+
+USE [PCMComputerDB];
+GO
+
+SET XACT_ABORT ON;
+GO
+
+-- Nâng cấp cơ sở dữ liệu đang có bằng cách đổi tên tại chỗ.
+IF EXISTS (SELECT 1 FROM sys.tables WHERE schema_id = SCHEMA_ID(N'dbo'))
 BEGIN
-    ALTER DATABASE PCMComputerDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE PCMComputerDB;
-END
+    DECLARE @Bang TABLE (TenCu SYSNAME NOT NULL, TenMoi SYSNAME NOT NULL);
+    INSERT INTO @Bang (TenCu, TenMoi)
+    VALUES
+        (N'Users', N'TAIKHOAN'),
+        (N'Categories', N'DANHMUC'),
+        (N'Products', N'SANPHAM'),
+        (N'Promotions', N'KHUYENMAI'),
+        (N'Orders', N'DONHANG'),
+        (N'OrderDetails', N'CHITIETDONHANG'),
+        (N'OrderStatusHistory', N'LICHSUTRANGTHAIDONHANG'),
+        (N'Contacts', N'LIENHE');
+
+    DECLARE @Cot TABLE (TenBang SYSNAME, TenCu SYSNAME, TenMoi SYSNAME);
+    INSERT INTO @Cot (TenBang, TenCu, TenMoi)
+    VALUES
+        (N'TAIKHOAN', N'UserId', N'ID_TAIKHOAN'),
+        (N'TAIKHOAN', N'Username', N'TEN_DANG_NHAP'),
+        (N'TAIKHOAN', N'PasswordHash', N'MA_BAM_MAT_KHAU'),
+        (N'TAIKHOAN', N'FullName', N'HO_TEN'),
+        (N'TAIKHOAN', N'Email', N'THU_DIEN_TU'),
+        (N'TAIKHOAN', N'Phone', N'SO_DIEN_THOAI'),
+        (N'TAIKHOAN', N'Address', N'DIA_CHI'),
+        (N'TAIKHOAN', N'Role', N'VAI_TRO'),
+        (N'TAIKHOAN', N'IsLocked', N'BI_KHOA'),
+        (N'TAIKHOAN', N'CreatedAt', N'NGAY_TAO'),
+        (N'DANHMUC', N'CategoryId', N'ID_DANHMUC'),
+        (N'DANHMUC', N'CategoryName', N'TEN_DANH_MUC'),
+        (N'DANHMUC', N'Slug', N'TEN_RUT_GON'),
+        (N'DANHMUC', N'PageUrl', N'DUONG_DAN_TRANG'),
+        (N'DANHMUC', N'IconPath', N'DUONG_DAN_BIEU_TUONG'),
+        (N'DANHMUC', N'Description', N'MO_TA'),
+        (N'DANHMUC', N'DisplayOrder', N'THU_TU_HIEN_THI'),
+        (N'DANHMUC', N'IsActive', N'DANG_HOAT_DONG'),
+        (N'SANPHAM', N'ProductId', N'ID_SANPHAM'),
+        (N'SANPHAM', N'ProductCode', N'MA_SAN_PHAM'),
+        (N'SANPHAM', N'ProductName', N'TEN_SAN_PHAM'),
+        (N'SANPHAM', N'CategoryId', N'ID_DANHMUC'),
+        (N'SANPHAM', N'Brand', N'THUONG_HIEU'),
+        (N'SANPHAM', N'OldPrice', N'GIA_CU'),
+        (N'SANPHAM', N'Price', N'GIA_BAN'),
+        (N'SANPHAM', N'StockQuantity', N'SO_LUONG_TON'),
+        (N'SANPHAM', N'WarrantyMonths', N'SO_THANG_BAO_HANH'),
+        (N'SANPHAM', N'ImageUrl', N'DUONG_DAN_ANH'),
+        (N'SANPHAM', N'Specifications', N'THONG_SO_KY_THUAT'),
+        (N'SANPHAM', N'Description', N'MO_TA'),
+        (N'SANPHAM', N'PromoCount', N'SO_UU_DAI'),
+        (N'SANPHAM', N'IsDeal', N'GIA_SOC'),
+        (N'SANPHAM', N'SoldCount', N'SO_LUONG_DA_BAN'),
+        (N'SANPHAM', N'Status', N'TRANG_THAI'),
+        (N'SANPHAM', N'CreatedAt', N'NGAY_TAO'),
+        (N'KHUYENMAI', N'PromotionId', N'ID_KHUYENMAI'),
+        (N'KHUYENMAI', N'PromotionName', N'TEN_KHUYEN_MAI'),
+        (N'KHUYENMAI', N'VoucherCode', N'MA_GIAM_GIA'),
+        (N'KHUYENMAI', N'DiscountType', N'LOAI_GIAM_GIA'),
+        (N'KHUYENMAI', N'DiscountValue', N'MUC_GIAM_GIA'),
+        (N'KHUYENMAI', N'MinOrderAmount', N'GIA_TRI_DON_TOI_THIEU'),
+        (N'KHUYENMAI', N'MaxDiscountAmount', N'MUC_GIAM_TOI_DA'),
+        (N'KHUYENMAI', N'UsageLimit', N'GIOI_HAN_SU_DUNG'),
+        (N'KHUYENMAI', N'UsedCount', N'SO_LUOT_DA_DUNG'),
+        (N'KHUYENMAI', N'StartDate', N'NGAY_BAT_DAU'),
+        (N'KHUYENMAI', N'EndDate', N'NGAY_KET_THUC'),
+        (N'KHUYENMAI', N'Description', N'MO_TA'),
+        (N'KHUYENMAI', N'IsActive', N'DANG_HOAT_DONG'),
+        (N'DONHANG', N'OrderId', N'ID_DONHANG'),
+        (N'DONHANG', N'OrderCode', N'MA_DON_HANG'),
+        (N'DONHANG', N'UserId', N'ID_TAIKHOAN'),
+        (N'DONHANG', N'ReceiverName', N'TEN_NGUOI_NHAN'),
+        (N'DONHANG', N'ReceiverPhone', N'DIEN_THOAI_NGUOI_NHAN'),
+        (N'DONHANG', N'ShippingAddress', N'DIA_CHI_GIAO_HANG'),
+        (N'DONHANG', N'Note', N'GHI_CHU'),
+        (N'DONHANG', N'PaymentMethod', N'PHUONG_THUC_THANH_TOAN'),
+        (N'DONHANG', N'SubTotal', N'TAM_TINH'),
+        (N'DONHANG', N'VoucherCode', N'MA_GIAM_GIA'),
+        (N'DONHANG', N'DiscountAmount', N'SO_TIEN_GIAM'),
+        (N'DONHANG', N'TotalAmount', N'TONG_TIEN'),
+        (N'DONHANG', N'OrderStatus', N'TRANG_THAI_DON_HANG'),
+        (N'DONHANG', N'CreatedAt', N'NGAY_TAO'),
+        (N'DONHANG', N'UpdatedAt', N'NGAY_CAP_NHAT'),
+        (N'CHITIETDONHANG', N'OrderDetailId', N'ID_CHITIETDONHANG'),
+        (N'CHITIETDONHANG', N'OrderId', N'ID_DONHANG'),
+        (N'CHITIETDONHANG', N'ProductId', N'ID_SANPHAM'),
+        (N'CHITIETDONHANG', N'ProductCode', N'MA_SAN_PHAM'),
+        (N'CHITIETDONHANG', N'ProductName', N'TEN_SAN_PHAM'),
+        (N'CHITIETDONHANG', N'ImageUrl', N'DUONG_DAN_ANH'),
+        (N'CHITIETDONHANG', N'UnitPrice', N'DON_GIA'),
+        (N'CHITIETDONHANG', N'Quantity', N'SO_LUONG'),
+        (N'CHITIETDONHANG', N'LineTotal', N'THANH_TIEN'),
+        (N'LICHSUTRANGTHAIDONHANG', N'HistoryId', N'ID_LICHSU'),
+        (N'LICHSUTRANGTHAIDONHANG', N'OrderId', N'ID_DONHANG'),
+        (N'LICHSUTRANGTHAIDONHANG', N'Status', N'TRANG_THAI'),
+        (N'LICHSUTRANGTHAIDONHANG', N'Note', N'GHI_CHU'),
+        (N'LICHSUTRANGTHAIDONHANG', N'UpdatedBy', N'NGUOI_CAP_NHAT'),
+        (N'LICHSUTRANGTHAIDONHANG', N'UpdatedAt', N'NGAY_CAP_NHAT'),
+        (N'LIENHE', N'ContactId', N'ID_LIENHE'),
+        (N'LIENHE', N'FullName', N'HO_TEN'),
+        (N'LIENHE', N'Phone', N'SO_DIEN_THOAI'),
+        (N'LIENHE', N'Email', N'THU_DIEN_TU'),
+        (N'LIENHE', N'Title', N'TIEU_DE'),
+        (N'LIENHE', N'Content', N'NOI_DUNG'),
+        (N'LIENHE', N'CreatedAt', N'NGAY_TAO'),
+        (N'LIENHE', N'IsResolved', N'DA_XU_LY');
+
+    DECLARE @RangBuoc TABLE (TenBang SYSNAME, TenCu SYSNAME, TenMoi SYSNAME);
+    INSERT INTO @RangBuoc (TenBang, TenCu, TenMoi)
+    VALUES
+        (N'TAIKHOAN', N'DF_Users_Role', N'DF_TAIKHOAN_VAI_TRO'),
+        (N'TAIKHOAN', N'DF_Users_IsLocked', N'DF_TAIKHOAN_BI_KHOA'),
+        (N'TAIKHOAN', N'DF_Users_CreatedAt', N'DF_TAIKHOAN_NGAY_TAO'),
+        (N'TAIKHOAN', N'CK_Users_Role', N'CK_TAIKHOAN_VAI_TRO'),
+        (N'DANHMUC', N'DF_Categories_Order', N'DF_DANHMUC_THU_TU_HIEN_THI'),
+        (N'DANHMUC', N'DF_Categories_IsActive', N'DF_DANHMUC_DANG_HOAT_DONG'),
+        (N'SANPHAM', N'DF_Products_OldPrice', N'DF_SANPHAM_GIA_CU'),
+        (N'SANPHAM', N'DF_Products_Stock', N'DF_SANPHAM_SO_LUONG_TON'),
+        (N'SANPHAM', N'DF_Products_Warranty', N'DF_SANPHAM_BAO_HANH'),
+        (N'SANPHAM', N'DF_Products_PromoCount', N'DF_SANPHAM_SO_UU_DAI'),
+        (N'SANPHAM', N'DF_Products_IsDeal', N'DF_SANPHAM_GIA_SOC'),
+        (N'SANPHAM', N'DF_Products_SoldCount', N'DF_SANPHAM_SO_LUONG_DA_BAN'),
+        (N'SANPHAM', N'DF_Products_Status', N'DF_SANPHAM_TRANG_THAI'),
+        (N'SANPHAM', N'DF_Products_CreatedAt', N'DF_SANPHAM_NGAY_TAO'),
+        (N'SANPHAM', N'FK_Products_Categories', N'FK_SANPHAM_DANHMUC'),
+        (N'SANPHAM', N'CK_Products_Price', N'CK_SANPHAM_GIA_BAN'),
+        (N'SANPHAM', N'CK_Products_Stock', N'CK_SANPHAM_SO_LUONG_TON'),
+        (N'KHUYENMAI', N'DF_Promotions_MinOrder', N'DF_KHUYENMAI_DON_TOI_THIEU'),
+        (N'KHUYENMAI', N'DF_Promotions_MaxDiscount', N'DF_KHUYENMAI_GIAM_TOI_DA'),
+        (N'KHUYENMAI', N'DF_Promotions_Limit', N'DF_KHUYENMAI_GIOI_HAN'),
+        (N'KHUYENMAI', N'DF_Promotions_Used', N'DF_KHUYENMAI_LUOT_DA_DUNG'),
+        (N'KHUYENMAI', N'DF_Promotions_IsActive', N'DF_KHUYENMAI_DANG_HOAT_DONG'),
+        (N'KHUYENMAI', N'CK_Promotions_Type', N'CK_KHUYENMAI_LOAI_GIAM'),
+        (N'KHUYENMAI', N'CK_Promotions_Dates', N'CK_KHUYENMAI_THOI_HAN'),
+        (N'KHUYENMAI', N'CK_Promotions_Value', N'CK_KHUYENMAI_MUC_GIAM'),
+        (N'DONHANG', N'DF_Orders_Payment', N'DF_DONHANG_THANH_TOAN'),
+        (N'DONHANG', N'DF_Orders_Discount', N'DF_DONHANG_GIAM_GIA'),
+        (N'DONHANG', N'DF_Orders_Status', N'DF_DONHANG_TRANG_THAI'),
+        (N'DONHANG', N'DF_Orders_CreatedAt', N'DF_DONHANG_NGAY_TAO'),
+        (N'DONHANG', N'DF_Orders_UpdatedAt', N'DF_DONHANG_NGAY_CAP_NHAT'),
+        (N'DONHANG', N'FK_Orders_Users', N'FK_DONHANG_TAIKHOAN'),
+        (N'CHITIETDONHANG', N'FK_OrderDetails_Orders', N'FK_CHITIETDONHANG_DONHANG'),
+        (N'CHITIETDONHANG', N'FK_OrderDetails_Products', N'FK_CHITIETDONHANG_SANPHAM'),
+        (N'CHITIETDONHANG', N'CK_OrderDetails_Qty', N'CK_CHITIETDONHANG_SO_LUONG'),
+        (N'LICHSUTRANGTHAIDONHANG', N'DF_OrderHistory_At', N'DF_LICHSUTRANGTHAIDONHANG_NGAY_CAP_NHAT'),
+        (N'LICHSUTRANGTHAIDONHANG', N'FK_OrderHistory_Orders', N'FK_LICHSUTRANGTHAIDONHANG_DONHANG'),
+        (N'LIENHE', N'DF_Contacts_CreatedAt', N'DF_LIENHE_NGAY_TAO'),
+        (N'LIENHE', N'DF_Contacts_Resolved', N'DF_LIENHE_DA_XU_LY');
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF EXISTS (
+            SELECT 1 FROM @Bang
+            WHERE (OBJECT_ID(N'dbo.' + TenCu, N'U') IS NULL AND OBJECT_ID(N'dbo.' + TenMoi, N'U') IS NULL)
+               OR (OBJECT_ID(N'dbo.' + TenCu, N'U') IS NOT NULL AND OBJECT_ID(N'dbo.' + TenMoi) IS NOT NULL)
+        )
+            THROW 50001, N'Thiếu bảng hoặc trùng tên bảng. Không thể đổi tên bảng.', 1;
+
+        DECLARE @TenCu SYSNAME, @TenMoi SYSNAME, @TenDayDu NVARCHAR(776);
+        DECLARE ds_bang CURSOR LOCAL STATIC FOR
+            SELECT TenCu, TenMoi FROM @Bang WHERE OBJECT_ID(N'dbo.' + TenCu, N'U') IS NOT NULL;
+
+        OPEN ds_bang;
+        FETCH NEXT FROM ds_bang INTO @TenCu, @TenMoi;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @TenDayDu = N'dbo.' + QUOTENAME(@TenCu);
+            EXEC sys.sp_rename @objname = @TenDayDu, @newname = @TenMoi, @objtype = N'OBJECT';
+            FETCH NEXT FROM ds_bang INTO @TenCu, @TenMoi;
+        END
+        CLOSE ds_bang;
+        DEALLOCATE ds_bang;
+
+        IF EXISTS (
+            SELECT 1 FROM @Cot
+            WHERE (COL_LENGTH(N'dbo.' + TenBang, TenCu) IS NULL AND COL_LENGTH(N'dbo.' + TenBang, TenMoi) IS NULL)
+               OR (COL_LENGTH(N'dbo.' + TenBang, TenCu) IS NOT NULL AND COL_LENGTH(N'dbo.' + TenBang, TenMoi) IS NOT NULL)
+        )
+            THROW 50002, N'Thiếu cột hoặc trùng tên cột. Không thể đổi tên lược đồ.', 1;
+
+        DECLARE @TenBang SYSNAME, @Lenh NVARCHAR(MAX);
+        DECLARE @KiemTra TABLE (TenBang SYSNAME, TenCu SYSNAME, TenMoi SYSNAME, DaTat BIT, ChuaKiemTra BIT);
+        INSERT INTO @KiemTra (TenBang, TenCu, TenMoi, DaTat, ChuaKiemTra)
+            SELECT r.TenBang, r.TenCu, r.TenMoi, c.is_disabled, c.is_not_trusted
+            FROM @RangBuoc r
+            INNER JOIN sys.check_constraints c
+                ON c.object_id = OBJECT_ID(N'dbo.' + r.TenCu)
+               AND c.parent_object_id = OBJECT_ID(N'dbo.' + r.TenBang, N'U');
+
+        -- SQL Server yêu cầu gỡ ràng buộc CHECK trước khi đổi tên cột mà nó tham chiếu.
+        DECLARE ds_kiem_tra_cu CURSOR LOCAL STATIC FOR SELECT TenBang, TenCu FROM @KiemTra;
+        OPEN ds_kiem_tra_cu;
+        FETCH NEXT FROM ds_kiem_tra_cu INTO @TenBang, @TenCu;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @Lenh = N'ALTER TABLE dbo.' + QUOTENAME(@TenBang) + N' DROP CONSTRAINT ' + QUOTENAME(@TenCu);
+            EXEC sys.sp_executesql @Lenh;
+            FETCH NEXT FROM ds_kiem_tra_cu INTO @TenBang, @TenCu;
+        END
+        CLOSE ds_kiem_tra_cu;
+        DEALLOCATE ds_kiem_tra_cu;
+
+        DECLARE ds_cot CURSOR LOCAL STATIC FOR
+            SELECT TenBang, TenCu, TenMoi FROM @Cot WHERE COL_LENGTH(N'dbo.' + TenBang, TenCu) IS NOT NULL;
+        OPEN ds_cot;
+        FETCH NEXT FROM ds_cot INTO @TenBang, @TenCu, @TenMoi;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @TenDayDu = N'dbo.' + QUOTENAME(@TenBang) + N'.' + QUOTENAME(@TenCu);
+            EXEC sys.sp_rename @objname = @TenDayDu, @newname = @TenMoi, @objtype = N'COLUMN';
+            FETCH NEXT FROM ds_cot INTO @TenBang, @TenCu, @TenMoi;
+        END
+        CLOSE ds_cot;
+        DEALLOCATE ds_cot;
+
+        DECLARE ds_rang_buoc CURSOR LOCAL STATIC FOR
+            SELECT r.TenCu, r.TenMoi
+            FROM @RangBuoc r
+            INNER JOIN sys.objects o
+                ON o.object_id = OBJECT_ID(N'dbo.' + r.TenCu)
+               AND o.parent_object_id = OBJECT_ID(N'dbo.' + r.TenBang, N'U');
+        OPEN ds_rang_buoc;
+        FETCH NEXT FROM ds_rang_buoc INTO @TenCu, @TenMoi;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @TenDayDu = N'dbo.' + QUOTENAME(@TenCu);
+            EXEC sys.sp_rename @objname = @TenDayDu, @newname = @TenMoi, @objtype = N'OBJECT';
+            FETCH NEXT FROM ds_rang_buoc INTO @TenCu, @TenMoi;
+        END
+        CLOSE ds_rang_buoc;
+        DEALLOCATE ds_rang_buoc;
+
+        DECLARE @DinhNghia TABLE (Ten SYSNAME, BieuThuc NVARCHAR(500));
+        INSERT INTO @DinhNghia (Ten, BieuThuc)
+        VALUES
+            (N'CK_TAIKHOAN_VAI_TRO', N'(VAI_TRO IN (''Admin'', ''Staff'', ''Customer''))'),
+            (N'CK_SANPHAM_GIA_BAN', N'(GIA_BAN >= 0 AND GIA_CU >= 0)'),
+            (N'CK_SANPHAM_SO_LUONG_TON', N'(SO_LUONG_TON >= 0)'),
+            (N'CK_KHUYENMAI_LOAI_GIAM', N'(LOAI_GIAM_GIA IN (''PERCENT'', ''AMOUNT''))'),
+            (N'CK_KHUYENMAI_THOI_HAN', N'(NGAY_KET_THUC >= NGAY_BAT_DAU)'),
+            (N'CK_KHUYENMAI_MUC_GIAM', N'( (LOAI_GIAM_GIA = ''PERCENT'' AND MUC_GIAM_GIA > 0 AND MUC_GIAM_GIA <= 100) OR (LOAI_GIAM_GIA = ''AMOUNT'' AND MUC_GIAM_GIA > 0) )'),
+            (N'CK_CHITIETDONHANG_SO_LUONG', N'(SO_LUONG > 0)');
+
+        DECLARE @BieuThuc NVARCHAR(500), @DaTat BIT, @ChuaKiemTra BIT;
+        DECLARE ds_kiem_tra_moi CURSOR LOCAL STATIC FOR
+            SELECT k.TenBang, k.TenMoi, d.BieuThuc, k.DaTat, k.ChuaKiemTra
+            FROM @KiemTra k INNER JOIN @DinhNghia d ON d.Ten = k.TenMoi;
+        OPEN ds_kiem_tra_moi;
+        FETCH NEXT FROM ds_kiem_tra_moi INTO @TenBang, @TenMoi, @BieuThuc, @DaTat, @ChuaKiemTra;
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @Lenh = N'ALTER TABLE dbo.' + QUOTENAME(@TenBang)
+                + CASE WHEN @ChuaKiemTra = 1 THEN N' WITH NOCHECK' ELSE N' WITH CHECK' END
+                + N' ADD CONSTRAINT ' + QUOTENAME(@TenMoi) + N' CHECK ' + @BieuThuc;
+            EXEC sys.sp_executesql @Lenh;
+            IF @DaTat = 1
+            BEGIN
+                SET @Lenh = N'ALTER TABLE dbo.' + QUOTENAME(@TenBang) + N' NOCHECK CONSTRAINT ' + QUOTENAME(@TenMoi);
+                EXEC sys.sp_executesql @Lenh;
+            END
+            FETCH NEXT FROM ds_kiem_tra_moi INTO @TenBang, @TenMoi, @BieuThuc, @DaTat, @ChuaKiemTra;
+        END
+        CLOSE ds_kiem_tra_moi;
+        DEALLOCATE ds_kiem_tra_moi;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
+END;
 GO
 
-CREATE DATABASE PCMComputerDB;
-GO
-
-USE PCMComputerDB;
-GO
+-- Chỉ tạo bảng và nạp dữ liệu mẫu khi cơ sở dữ liệu trống.
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE schema_id = SCHEMA_ID(N'dbo'))
+BEGIN
+BEGIN TRY
+    BEGIN TRANSACTION;
 
 -- ============================================================================
 -- 1. BẢNG TAIKHOAN (Quản lý tài khoản & phân quyền - UC01, UC02, UC12, UC15)
 -- ============================================================================
 CREATE TABLE dbo.TAIKHOAN (
-    UserId INT IDENTITY(1,1) PRIMARY KEY, -- Mã tài khoản
-    Username NVARCHAR(50) NOT NULL UNIQUE, -- Tên đăng nhập
-    PasswordHash NVARCHAR(128) NOT NULL, -- Mã băm mật khẩu
-    FullName NVARCHAR(100) NOT NULL, -- Họ và tên
-    Email NVARCHAR(100) NOT NULL UNIQUE, -- Địa chỉ thư điện tử
-    Phone NVARCHAR(20) NOT NULL, -- Số điện thoại
-    Address NVARCHAR(255) NULL, -- Địa chỉ
-    Role NVARCHAR(20) NOT NULL CONSTRAINT DF_Users_Role DEFAULT ('Customer'), -- Vai trò: quản trị viên, nhân viên hoặc khách hàng
-    IsLocked BIT NOT NULL CONSTRAINT DF_Users_IsLocked DEFAULT (0), -- Tài khoản bị khóa
-    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Users_CreatedAt DEFAULT (GETDATE()), -- Thời điểm tạo tài khoản
-    CONSTRAINT CK_Users_Role CHECK (Role IN ('Admin', 'Staff', 'Customer'))
+    ID_TAIKHOAN INT IDENTITY(1,1) PRIMARY KEY, -- Mã tài khoản
+    TEN_DANG_NHAP NVARCHAR(50) NOT NULL UNIQUE, -- Tên đăng nhập
+    MA_BAM_MAT_KHAU NVARCHAR(128) NOT NULL, -- Mã băm mật khẩu
+    HO_TEN NVARCHAR(100) NOT NULL, -- Họ và tên
+    THU_DIEN_TU NVARCHAR(100) NOT NULL UNIQUE, -- Địa chỉ thư điện tử
+    SO_DIEN_THOAI NVARCHAR(20) NOT NULL, -- Số điện thoại
+    DIA_CHI NVARCHAR(255) NULL, -- Địa chỉ
+    VAI_TRO NVARCHAR(20) NOT NULL CONSTRAINT DF_TAIKHOAN_VAI_TRO DEFAULT ('Customer'), -- Vai trò: quản trị viên, nhân viên hoặc khách hàng
+    BI_KHOA BIT NOT NULL CONSTRAINT DF_TAIKHOAN_BI_KHOA DEFAULT (0), -- Tài khoản bị khóa
+    NGAY_TAO DATETIME NOT NULL CONSTRAINT DF_TAIKHOAN_NGAY_TAO DEFAULT (GETDATE()), -- Thời điểm tạo tài khoản
+    CONSTRAINT CK_TAIKHOAN_VAI_TRO CHECK (VAI_TRO IN ('Admin', 'Staff', 'Customer'))
 );
-GO
 
 -- ============================================================================
 -- 2. BẢNG DANHMUC (Quản lý danh mục máy tính & linh kiện - UC03, UC10)
 -- ============================================================================
 CREATE TABLE dbo.DANHMUC (
-    CategoryId INT IDENTITY(1,1) PRIMARY KEY, -- Mã danh mục
-    CategoryName NVARCHAR(100) NOT NULL UNIQUE, -- Tên danh mục
-    Slug NVARCHAR(50) NOT NULL UNIQUE, -- Tên rút gọn dùng trong đường dẫn
-    PageUrl NVARCHAR(100) NULL, -- Đường dẫn trang danh mục
-    IconPath NVARCHAR(255) NULL, -- Đường dẫn biểu tượng
-    Description NVARCHAR(500) NULL, -- Mô tả danh mục
-    DisplayOrder INT NOT NULL CONSTRAINT DF_Categories_Order DEFAULT (1), -- Thứ tự hiển thị
-    IsActive BIT NOT NULL CONSTRAINT DF_Categories_IsActive DEFAULT (1) -- Danh mục đang hoạt động
+    ID_DANHMUC INT IDENTITY(1,1) PRIMARY KEY, -- Mã danh mục
+    TEN_DANH_MUC NVARCHAR(100) NOT NULL UNIQUE, -- Tên danh mục
+    TEN_RUT_GON NVARCHAR(50) NOT NULL UNIQUE, -- Tên rút gọn dùng trong đường dẫn
+    DUONG_DAN_TRANG NVARCHAR(100) NULL, -- Đường dẫn trang danh mục
+    DUONG_DAN_BIEU_TUONG NVARCHAR(255) NULL, -- Đường dẫn biểu tượng
+    MO_TA NVARCHAR(500) NULL, -- Mô tả danh mục
+    THU_TU_HIEN_THI INT NOT NULL CONSTRAINT DF_DANHMUC_THU_TU_HIEN_THI DEFAULT (1), -- Thứ tự hiển thị
+    DANG_HOAT_DONG BIT NOT NULL CONSTRAINT DF_DANHMUC_DANG_HOAT_DONG DEFAULT (1) -- Danh mục đang hoạt động
 );
-GO
 
 -- ============================================================================
 -- 3. BẢNG SANPHAM (Quản lý máy tính & linh kiện - UC03, UC04, UC05, UC09)
 -- ============================================================================
 CREATE TABLE dbo.SANPHAM (
-    ProductId INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh sản phẩm
-    ProductCode NVARCHAR(30) NOT NULL UNIQUE, -- Mã hàng
-    ProductName NVARCHAR(250) NOT NULL, -- Tên sản phẩm
-    CategoryId INT NOT NULL, -- Mã danh mục
-    Brand NVARCHAR(50) NOT NULL, -- Thương hiệu
-    OldPrice DECIMAL(18,0) NOT NULL CONSTRAINT DF_Products_OldPrice DEFAULT (0), -- Giá cũ
-    Price DECIMAL(18,0) NOT NULL, -- Giá bán hiện tại
-    StockQuantity INT NOT NULL CONSTRAINT DF_Products_Stock DEFAULT (0), -- Số lượng tồn kho
-    WarrantyMonths INT NOT NULL CONSTRAINT DF_Products_Warranty DEFAULT (24), -- Số tháng bảo hành
-    ImageUrl NVARCHAR(255) NOT NULL, -- Đường dẫn ảnh
-    Specifications NVARCHAR(MAX) NULL, -- Thông số kỹ thuật, phân cách bằng dấu gạch đứng
-    Description NVARCHAR(MAX) NULL, -- Mô tả sản phẩm
-    PromoCount INT NOT NULL CONSTRAINT DF_Products_PromoCount DEFAULT (2), -- Số ưu đãi hiển thị kèm sản phẩm
-    IsDeal BIT NOT NULL CONSTRAINT DF_Products_IsDeal DEFAULT (0), -- Sản phẩm thuộc chương trình giá sốc
-    SoldCount INT NOT NULL CONSTRAINT DF_Products_SoldCount DEFAULT (0), -- Số lượng đã bán
-    Status NVARCHAR(50) NOT NULL CONSTRAINT DF_Products_Status DEFAULT (N'Đang kinh doanh'), -- Trạng thái kinh doanh
-    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Products_CreatedAt DEFAULT (GETDATE()), -- Thời điểm tạo sản phẩm
-    CONSTRAINT FK_Products_Categories FOREIGN KEY (CategoryId) REFERENCES dbo.DANHMUC(CategoryId),
-    CONSTRAINT CK_Products_Price CHECK (Price >= 0 AND OldPrice >= 0),
-    CONSTRAINT CK_Products_Stock CHECK (StockQuantity >= 0)
+    ID_SANPHAM INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh sản phẩm
+    MA_SAN_PHAM NVARCHAR(30) NOT NULL UNIQUE, -- Mã hàng
+    TEN_SAN_PHAM NVARCHAR(250) NOT NULL, -- Tên sản phẩm
+    ID_DANHMUC INT NOT NULL, -- Mã danh mục
+    THUONG_HIEU NVARCHAR(50) NOT NULL, -- Thương hiệu
+    GIA_CU DECIMAL(18,0) NOT NULL CONSTRAINT DF_SANPHAM_GIA_CU DEFAULT (0), -- Giá cũ
+    GIA_BAN DECIMAL(18,0) NOT NULL, -- Giá bán hiện tại
+    SO_LUONG_TON INT NOT NULL CONSTRAINT DF_SANPHAM_SO_LUONG_TON DEFAULT (0), -- Số lượng tồn kho
+    SO_THANG_BAO_HANH INT NOT NULL CONSTRAINT DF_SANPHAM_BAO_HANH DEFAULT (24), -- Số tháng bảo hành
+    DUONG_DAN_ANH NVARCHAR(255) NOT NULL, -- Đường dẫn ảnh
+    THONG_SO_KY_THUAT NVARCHAR(MAX) NULL, -- Thông số kỹ thuật, phân cách bằng dấu gạch đứng
+    MO_TA NVARCHAR(MAX) NULL, -- Mô tả sản phẩm
+    SO_UU_DAI INT NOT NULL CONSTRAINT DF_SANPHAM_SO_UU_DAI DEFAULT (2), -- Số ưu đãi hiển thị kèm sản phẩm
+    GIA_SOC BIT NOT NULL CONSTRAINT DF_SANPHAM_GIA_SOC DEFAULT (0), -- Sản phẩm thuộc chương trình giá sốc
+    SO_LUONG_DA_BAN INT NOT NULL CONSTRAINT DF_SANPHAM_SO_LUONG_DA_BAN DEFAULT (0), -- Số lượng đã bán
+    TRANG_THAI NVARCHAR(50) NOT NULL CONSTRAINT DF_SANPHAM_TRANG_THAI DEFAULT (N'Đang kinh doanh'), -- Trạng thái kinh doanh
+    NGAY_TAO DATETIME NOT NULL CONSTRAINT DF_SANPHAM_NGAY_TAO DEFAULT (GETDATE()), -- Thời điểm tạo sản phẩm
+    CONSTRAINT FK_SANPHAM_DANHMUC FOREIGN KEY (ID_DANHMUC) REFERENCES dbo.DANHMUC(ID_DANHMUC),
+    CONSTRAINT CK_SANPHAM_GIA_BAN CHECK (GIA_BAN >= 0 AND GIA_CU >= 0),
+    CONSTRAINT CK_SANPHAM_SO_LUONG_TON CHECK (SO_LUONG_TON >= 0)
 );
-GO
 
 -- ============================================================================
 -- 4. BẢNG KHUYENMAI (Quản lý khuyến mãi / Mã giảm giá - UC13, UC16)
 -- ============================================================================
 CREATE TABLE dbo.KHUYENMAI (
-    PromotionId INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh chương trình
-    PromotionName NVARCHAR(150) NOT NULL, -- Tên chương trình
-    VoucherCode NVARCHAR(50) NOT NULL UNIQUE, -- Mã giảm giá
-    DiscountType NVARCHAR(20) NOT NULL, -- Cách giảm: theo tỷ lệ phần trăm hoặc số tiền cố định
-    DiscountValue DECIMAL(18,0) NOT NULL, -- Mức giảm
-    MinOrderAmount DECIMAL(18,0) NOT NULL CONSTRAINT DF_Promotions_MinOrder DEFAULT (0), -- Giá trị đơn tối thiểu
-    MaxDiscountAmount DECIMAL(18,0) NOT NULL CONSTRAINT DF_Promotions_MaxDiscount DEFAULT (0), -- Số tiền giảm tối đa
-    UsageLimit INT NOT NULL CONSTRAINT DF_Promotions_Limit DEFAULT (100), -- Giới hạn lượt dùng
-    UsedCount INT NOT NULL CONSTRAINT DF_Promotions_Used DEFAULT (0), -- Số lượt đã dùng
-    StartDate DATETIME NOT NULL, -- Thời điểm bắt đầu
-    EndDate DATETIME NOT NULL, -- Thời điểm kết thúc
-    Description NVARCHAR(500) NULL, -- Mô tả chương trình
-    IsActive BIT NOT NULL CONSTRAINT DF_Promotions_IsActive DEFAULT (1), -- Chương trình đang hoạt động
-    CONSTRAINT CK_Promotions_Type CHECK (DiscountType IN ('PERCENT', 'AMOUNT')),
-    CONSTRAINT CK_Promotions_Dates CHECK (EndDate >= StartDate),
-    CONSTRAINT CK_Promotions_Value CHECK (
-        (DiscountType = 'PERCENT' AND DiscountValue > 0 AND DiscountValue <= 100)
-        OR (DiscountType = 'AMOUNT' AND DiscountValue > 0)
+    ID_KHUYENMAI INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh chương trình
+    TEN_KHUYEN_MAI NVARCHAR(150) NOT NULL, -- Tên chương trình
+    MA_GIAM_GIA NVARCHAR(50) NOT NULL UNIQUE, -- Mã giảm giá
+    LOAI_GIAM_GIA NVARCHAR(20) NOT NULL, -- Cách giảm: theo tỷ lệ phần trăm hoặc số tiền cố định
+    MUC_GIAM_GIA DECIMAL(18,0) NOT NULL, -- Mức giảm
+    GIA_TRI_DON_TOI_THIEU DECIMAL(18,0) NOT NULL CONSTRAINT DF_KHUYENMAI_DON_TOI_THIEU DEFAULT (0), -- Giá trị đơn tối thiểu
+    MUC_GIAM_TOI_DA DECIMAL(18,0) NOT NULL CONSTRAINT DF_KHUYENMAI_GIAM_TOI_DA DEFAULT (0), -- Số tiền giảm tối đa
+    GIOI_HAN_SU_DUNG INT NOT NULL CONSTRAINT DF_KHUYENMAI_GIOI_HAN DEFAULT (100), -- Giới hạn lượt dùng
+    SO_LUOT_DA_DUNG INT NOT NULL CONSTRAINT DF_KHUYENMAI_LUOT_DA_DUNG DEFAULT (0), -- Số lượt đã dùng
+    NGAY_BAT_DAU DATETIME NOT NULL, -- Thời điểm bắt đầu
+    NGAY_KET_THUC DATETIME NOT NULL, -- Thời điểm kết thúc
+    MO_TA NVARCHAR(500) NULL, -- Mô tả chương trình
+    DANG_HOAT_DONG BIT NOT NULL CONSTRAINT DF_KHUYENMAI_DANG_HOAT_DONG DEFAULT (1), -- Chương trình đang hoạt động
+    CONSTRAINT CK_KHUYENMAI_LOAI_GIAM CHECK (LOAI_GIAM_GIA IN ('PERCENT', 'AMOUNT')),
+    CONSTRAINT CK_KHUYENMAI_THOI_HAN CHECK (NGAY_KET_THUC >= NGAY_BAT_DAU),
+    CONSTRAINT CK_KHUYENMAI_MUC_GIAM CHECK (
+        (LOAI_GIAM_GIA = 'PERCENT' AND MUC_GIAM_GIA > 0 AND MUC_GIAM_GIA <= 100)
+        OR (LOAI_GIAM_GIA = 'AMOUNT' AND MUC_GIAM_GIA > 0)
     )
 );
-GO
 
 -- ============================================================================
 -- 5. BẢNG DONHANG (Đơn đặt hàng - UC07, UC08, UC11, UC14)
 -- ============================================================================
 CREATE TABLE dbo.DONHANG (
-    OrderId INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh đơn hàng
-    OrderCode NVARCHAR(30) NOT NULL UNIQUE, -- Mã đơn hiển thị cho khách hàng
-    UserId INT NOT NULL, -- Mã tài khoản đặt hàng
-    ReceiverName NVARCHAR(100) NOT NULL, -- Tên người nhận
-    ReceiverPhone NVARCHAR(20) NOT NULL, -- Số điện thoại người nhận
-    ShippingAddress NVARCHAR(300) NOT NULL, -- Địa chỉ giao hàng
-    Note NVARCHAR(500) NULL, -- Ghi chú đơn hàng
-    PaymentMethod NVARCHAR(50) NOT NULL CONSTRAINT DF_Orders_Payment DEFAULT (N'COD - Thanh toán khi nhận hàng'), -- Phương thức thanh toán
-    SubTotal DECIMAL(18,0) NOT NULL, -- Tiền hàng trước giảm giá
-    VoucherCode NVARCHAR(50) NULL, -- Mã giảm giá đã áp dụng
-    DiscountAmount DECIMAL(18,0) NOT NULL CONSTRAINT DF_Orders_Discount DEFAULT (0), -- Số tiền được giảm
-    TotalAmount DECIMAL(18,0) NOT NULL, -- Tổng tiền phải trả
-    OrderStatus NVARCHAR(50) NOT NULL CONSTRAINT DF_Orders_Status DEFAULT (N'Chờ xác nhận'), -- Trạng thái đơn hàng
-    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Orders_CreatedAt DEFAULT (GETDATE()), -- Thời điểm đặt hàng
-    UpdatedAt DATETIME NOT NULL CONSTRAINT DF_Orders_UpdatedAt DEFAULT (GETDATE()), -- Thời điểm cập nhật gần nhất
-    CONSTRAINT FK_Orders_Users FOREIGN KEY (UserId) REFERENCES dbo.TAIKHOAN(UserId)
+    ID_DONHANG INT IDENTITY(1,1) PRIMARY KEY, -- Mã định danh đơn hàng
+    MA_DON_HANG NVARCHAR(30) NOT NULL UNIQUE, -- Mã đơn hiển thị cho khách hàng
+    ID_TAIKHOAN INT NOT NULL, -- Mã tài khoản đặt hàng
+    TEN_NGUOI_NHAN NVARCHAR(100) NOT NULL, -- Tên người nhận
+    DIEN_THOAI_NGUOI_NHAN NVARCHAR(20) NOT NULL, -- Số điện thoại người nhận
+    DIA_CHI_GIAO_HANG NVARCHAR(300) NOT NULL, -- Địa chỉ giao hàng
+    GHI_CHU NVARCHAR(500) NULL, -- Ghi chú đơn hàng
+    PHUONG_THUC_THANH_TOAN NVARCHAR(50) NOT NULL CONSTRAINT DF_DONHANG_THANH_TOAN DEFAULT (N'COD - Thanh toán khi nhận hàng'), -- Phương thức thanh toán
+    TAM_TINH DECIMAL(18,0) NOT NULL, -- Tiền hàng trước giảm giá
+    MA_GIAM_GIA NVARCHAR(50) NULL, -- Mã giảm giá đã áp dụng
+    SO_TIEN_GIAM DECIMAL(18,0) NOT NULL CONSTRAINT DF_DONHANG_GIAM_GIA DEFAULT (0), -- Số tiền được giảm
+    TONG_TIEN DECIMAL(18,0) NOT NULL, -- Tổng tiền phải trả
+    TRANG_THAI_DON_HANG NVARCHAR(50) NOT NULL CONSTRAINT DF_DONHANG_TRANG_THAI DEFAULT (N'Chờ xác nhận'), -- Trạng thái đơn hàng
+    NGAY_TAO DATETIME NOT NULL CONSTRAINT DF_DONHANG_NGAY_TAO DEFAULT (GETDATE()), -- Thời điểm đặt hàng
+    NGAY_CAP_NHAT DATETIME NOT NULL CONSTRAINT DF_DONHANG_NGAY_CAP_NHAT DEFAULT (GETDATE()), -- Thời điểm cập nhật gần nhất
+    CONSTRAINT FK_DONHANG_TAIKHOAN FOREIGN KEY (ID_TAIKHOAN) REFERENCES dbo.TAIKHOAN(ID_TAIKHOAN)
 );
-GO
 
 -- ============================================================================
 -- 6. BẢNG CHITIETDONHANG (Chi tiết đơn hàng - UC07, UC08, UC11, UC14)
 -- ============================================================================
 CREATE TABLE dbo.CHITIETDONHANG (
-    OrderDetailId INT IDENTITY(1,1) PRIMARY KEY, -- Mã dòng chi tiết
-    OrderId INT NOT NULL, -- Mã đơn hàng
-    ProductId INT NOT NULL, -- Mã định danh sản phẩm
-    ProductCode NVARCHAR(30) NOT NULL, -- Mã hàng tại thời điểm đặt
-    ProductName NVARCHAR(250) NOT NULL, -- Tên sản phẩm tại thời điểm đặt
-    ImageUrl NVARCHAR(255) NULL, -- Đường dẫn ảnh sản phẩm
-    UnitPrice DECIMAL(18,0) NOT NULL, -- Đơn giá tại thời điểm đặt
-    Quantity INT NOT NULL, -- Số lượng đặt mua
-    LineTotal DECIMAL(18,0) NOT NULL, -- Thành tiền của dòng
-    CONSTRAINT FK_OrderDetails_Orders FOREIGN KEY (OrderId) REFERENCES dbo.DONHANG(OrderId) ON DELETE CASCADE,
-    CONSTRAINT FK_OrderDetails_Products FOREIGN KEY (ProductId) REFERENCES dbo.SANPHAM(ProductId),
-    CONSTRAINT CK_OrderDetails_Qty CHECK (Quantity > 0)
+    ID_CHITIETDONHANG INT IDENTITY(1,1) PRIMARY KEY, -- Mã dòng chi tiết
+    ID_DONHANG INT NOT NULL, -- Mã đơn hàng
+    ID_SANPHAM INT NOT NULL, -- Mã định danh sản phẩm
+    MA_SAN_PHAM NVARCHAR(30) NOT NULL, -- Mã hàng tại thời điểm đặt
+    TEN_SAN_PHAM NVARCHAR(250) NOT NULL, -- Tên sản phẩm tại thời điểm đặt
+    DUONG_DAN_ANH NVARCHAR(255) NULL, -- Đường dẫn ảnh sản phẩm
+    DON_GIA DECIMAL(18,0) NOT NULL, -- Đơn giá tại thời điểm đặt
+    SO_LUONG INT NOT NULL, -- Số lượng đặt mua
+    THANH_TIEN DECIMAL(18,0) NOT NULL, -- Thành tiền của dòng
+    CONSTRAINT FK_CHITIETDONHANG_DONHANG FOREIGN KEY (ID_DONHANG) REFERENCES dbo.DONHANG(ID_DONHANG) ON DELETE CASCADE,
+    CONSTRAINT FK_CHITIETDONHANG_SANPHAM FOREIGN KEY (ID_SANPHAM) REFERENCES dbo.SANPHAM(ID_SANPHAM),
+    CONSTRAINT CK_CHITIETDONHANG_SO_LUONG CHECK (SO_LUONG > 0)
 );
-GO
 
 -- ============================================================================
 -- 7. BẢNG LICHSUTRANGTHAIDONHANG (Lịch sử cập nhật trạng thái đơn hàng - UC11)
 -- ============================================================================
 CREATE TABLE dbo.LICHSUTRANGTHAIDONHANG (
-    HistoryId INT IDENTITY(1,1) PRIMARY KEY, -- Mã lượt cập nhật
-    OrderId INT NOT NULL, -- Mã đơn hàng
-    Status NVARCHAR(50) NOT NULL, -- Trạng thái sau khi cập nhật
-    Note NVARCHAR(300) NULL, -- Ghi chú cập nhật
-    UpdatedBy NVARCHAR(100) NULL, -- Tên người cập nhật
-    UpdatedAt DATETIME NOT NULL CONSTRAINT DF_OrderHistory_At DEFAULT (GETDATE()), -- Thời điểm cập nhật
-    CONSTRAINT FK_OrderHistory_Orders FOREIGN KEY (OrderId) REFERENCES dbo.DONHANG(OrderId) ON DELETE CASCADE
+    ID_LICHSU INT IDENTITY(1,1) PRIMARY KEY, -- Mã lượt cập nhật
+    ID_DONHANG INT NOT NULL, -- Mã đơn hàng
+    TRANG_THAI NVARCHAR(50) NOT NULL, -- Trạng thái sau khi cập nhật
+    GHI_CHU NVARCHAR(300) NULL, -- Ghi chú cập nhật
+    NGUOI_CAP_NHAT NVARCHAR(100) NULL, -- Tên người cập nhật
+    NGAY_CAP_NHAT DATETIME NOT NULL CONSTRAINT DF_LICHSUTRANGTHAIDONHANG_NGAY_CAP_NHAT DEFAULT (GETDATE()), -- Thời điểm cập nhật
+    CONSTRAINT FK_LICHSUTRANGTHAIDONHANG_DONHANG FOREIGN KEY (ID_DONHANG) REFERENCES dbo.DONHANG(ID_DONHANG) ON DELETE CASCADE
 );
-GO
 
 -- ============================================================================
 -- 8. BẢNG LIENHE (Liên hệ & Hỗ trợ khách hàng)
 -- ============================================================================
 CREATE TABLE dbo.LIENHE (
-    ContactId INT IDENTITY(1,1) PRIMARY KEY, -- Mã liên hệ
-    FullName NVARCHAR(100) NOT NULL, -- Họ và tên người gửi
-    Phone NVARCHAR(20) NOT NULL, -- Số điện thoại người gửi
-    Email NVARCHAR(100) NOT NULL, -- Địa chỉ thư điện tử
-    Title NVARCHAR(200) NULL, -- Tiêu đề liên hệ
-    Content NVARCHAR(MAX) NOT NULL, -- Nội dung liên hệ
-    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Contacts_CreatedAt DEFAULT (GETDATE()), -- Thời điểm gửi
-    IsResolved BIT NOT NULL CONSTRAINT DF_Contacts_Resolved DEFAULT (0) -- Liên hệ đã được xử lý
+    ID_LIENHE INT IDENTITY(1,1) PRIMARY KEY, -- Mã liên hệ
+    HO_TEN NVARCHAR(100) NOT NULL, -- Họ và tên người gửi
+    SO_DIEN_THOAI NVARCHAR(20) NOT NULL, -- Số điện thoại người gửi
+    THU_DIEN_TU NVARCHAR(100) NOT NULL, -- Địa chỉ thư điện tử
+    TIEU_DE NVARCHAR(200) NULL, -- Tiêu đề liên hệ
+    NOI_DUNG NVARCHAR(MAX) NOT NULL, -- Nội dung liên hệ
+    NGAY_TAO DATETIME NOT NULL CONSTRAINT DF_LIENHE_NGAY_TAO DEFAULT (GETDATE()), -- Thời điểm gửi
+    DA_XU_LY BIT NOT NULL CONSTRAINT DF_LIENHE_DA_XU_LY DEFAULT (0) -- Liên hệ đã được xử lý
 );
-GO
 
 -- ============================================================================
 -- DỮ LIỆU MẪU
@@ -184,7 +451,7 @@ GO
 -- 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
 -- ============================================================================
 
-INSERT INTO dbo.TAIKHOAN (Username, PasswordHash, FullName, Email, Phone, Address, Role, IsLocked)
+INSERT INTO dbo.TAIKHOAN (TEN_DANG_NHAP, MA_BAM_MAT_KHAU, HO_TEN, THU_DIEN_TU, SO_DIEN_THOAI, DIA_CHI, VAI_TRO, BI_KHOA)
 VALUES
 (N'admin', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'Quản Trị Viên Hệ Thống', N'admin@pcmcomputer.vn', N'0366258142', N'83-85 Thái Hà, Đống Đa, Hà Nội', N'Admin', 0),
 (N'staff', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'Nguyễn Văn Nhân Viên', N'staff@pcmcomputer.vn', N'0879979997', N'83A Cửu Long, Quận 10, TP.HCM', N'Staff', 0),
@@ -192,10 +459,9 @@ VALUES
 (N'khachhang', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'Lê Hoàng Khách Hàng', N'khachhang@gmail.com', N'0987654321', N'Số 12 Cầu Giấy, Phường Quan Hoa, Cầu Giấy, Hà Nội', N'Customer', 0),
 (N'minhanh', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'Phạm Minh Anh', N'minhanh@gmail.com', N'0905112233', N'45 Nguyễn Thị Minh Khai, Quận 1, TP.HCM', N'Customer', 0),
 (N'userlocked', N'8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', N'Tài Khoản Vi Phạm', N'locked@gmail.com', N'0933445566', N'Hà Nội', N'Customer', 1);
-GO
 
 -- Danh mục sản phẩm khớp với trình đơn và thanh bên của PCM Computer
-INSERT INTO dbo.DANHMUC (CategoryName, Slug, PageUrl, IconPath, Description, DisplayOrder, IsActive)
+INSERT INTO dbo.DANHMUC (TEN_DANH_MUC, TEN_RUT_GON, DUONG_DAN_TRANG, DUONG_DAN_BIEU_TUONG, MO_TA, THU_TU_HIEN_THI, DANG_HOAT_DONG)
 VALUES
 (N'Laptop Gaming - Đồ Họa', N'gaming-laptops', N'MayTinhXachTayChoiGame.aspx', N'./BieuTuong/cat.png', N'Laptop cấu hình cao chuyên game và thiết kế đồ họa 3D, render', 1, 1),
 (N'Laptop - Máy Tính Xách Tay', N'laptops', N'MayTinhXachTay.aspx', N'./BieuTuong/laptop.png', N'Laptop văn phòng, học tập mỏng nhẹ, pin bền bỉ', 2, 1),
@@ -211,12 +477,11 @@ VALUES
 (N'Thiết Bị Mạng, Camera', N'networking-cameras', N'ThietBiMangCamera.aspx', N'./BieuTuong/Thietbimang.png', N'Router WiFi 6, bộ phát Mesh, Switch mạng và Camera an ninh', 12, 1),
 (N'Điện Thoại & Máy Chơi Game', N'phones', N'DienThoai.aspx', N'./BieuTuong/cat.png', N'Thiết bị di động thông minh và máy chơi game cầm tay cao cấp', 13, 1),
 (N'Đồng Hồ Thông Minh', N'watches', N'DongHoThongMinh.aspx', N'./BieuTuong/phukien.png', N'Đồng hồ thông minh theo dõi sức khỏe, thể thao', 14, 1);
-GO
 
 -- Sản phẩm phong phú (Sử dụng hình ảnh thực tế trong thư mục ./anh pc/)
 INSERT INTO dbo.SANPHAM (
-    ProductCode, ProductName, CategoryId, Brand, OldPrice, Price, StockQuantity, WarrantyMonths,
-    ImageUrl, Specifications, Description, PromoCount, IsDeal, SoldCount, Status
+    MA_SAN_PHAM, TEN_SAN_PHAM, ID_DANHMUC, THUONG_HIEU, GIA_CU, GIA_BAN, SO_LUONG_TON, SO_THANG_BAO_HANH,
+    DUONG_DAN_ANH, THONG_SO_KY_THUAT, MO_TA, SO_UU_DAI, GIA_SOC, SO_LUONG_DA_BAN, TRANG_THAI
 )
 VALUES
 -- 1. Laptop Gaming - Đồ Họa (CategoryId = 1)
@@ -575,14 +840,13 @@ VALUES
  N'Màn hình: AMOLED 1.3 inch cảm ứng kính Gorilla Glass 3 | Định vị: Đa băng tần GNSS với công nghệ SatIQ | Pin: Lên đến 13 ngày | Tính năng: Báo cáo buổi sáng Morning Report, Trạng thái luyện tập Training Readiness, VO2 Max',
  N'Người bạn đồng hành số 1 cho người chạy bộ và ba môn phối hợp (Triathlon), tích hợp kho nhạc và kế hoạch tập luyện cá nhân hóa theo từng ngày.',
  2, 0, 24, N'Đang kinh doanh');
-GO
 
 -- ============================================================================
 -- KHUYẾN MÃI & MÃ GIẢM GIÁ (UC13, UC16)
 -- ============================================================================
 INSERT INTO dbo.KHUYENMAI (
-    PromotionName, VoucherCode, DiscountType, DiscountValue, MinOrderAmount, MaxDiscountAmount,
-    UsageLimit, UsedCount, StartDate, EndDate, Description, IsActive
+    TEN_KHUYEN_MAI, MA_GIAM_GIA, LOAI_GIAM_GIA, MUC_GIAM_GIA, GIA_TRI_DON_TOI_THIEU, MUC_GIAM_TOI_DA,
+    GIOI_HAN_SU_DUNG, SO_LUOT_DA_DUNG, NGAY_BAT_DAU, NGAY_KET_THUC, MO_TA, DANG_HOAT_DONG
 )
 VALUES
 (N'Giảm 500.000đ cho đơn từ 10 triệu', N'PCM500K', N'AMOUNT', 500000, 10000000, 500000,
@@ -593,14 +857,13 @@ VALUES
  500, 40, '2025-01-01', '2027-12-31', N'Chào mừng khách hàng mới giảm ngay 200.000đ cho đơn từ 1.000.000đ', 1),
 (N'Khuyến mãi Hè đã hết hạn (Test ngoại lệ)', N'HETHAN', N'PERCENT', 10, 2000000, 1000000,
  50, 10, '2024-01-01', '2024-06-30', N'Mã đã hết hạn để kiểm thử luồng ngoại lệ UC16', 1);
-GO
 
 -- ============================================================================
 -- ĐƠN HÀNG MẪU (Để kiểm thử UC08, UC11 và Thống kê doanh thu UC14)
 -- ============================================================================
 INSERT INTO dbo.DONHANG (
-    OrderCode, UserId, ReceiverName, ReceiverPhone, ShippingAddress, Note,
-    PaymentMethod, SubTotal, VoucherCode, DiscountAmount, TotalAmount, OrderStatus, CreatedAt, UpdatedAt
+    MA_DON_HANG, ID_TAIKHOAN, TEN_NGUOI_NHAN, DIEN_THOAI_NGUOI_NHAN, DIA_CHI_GIAO_HANG, GHI_CHU,
+    PHUONG_THUC_THANH_TOAN, TAM_TINH, MA_GIAM_GIA, SO_TIEN_GIAM, TONG_TIEN, TRANG_THAI_DON_HANG, NGAY_TAO, NGAY_CAP_NHAT
 )
 VALUES
 (N'DH20261101', 4, N'Lê Hoàng Khách Hàng', N'0987654321', N'Số 12 Cầu Giấy, Phường Quan Hoa, Cầu Giấy, Hà Nội', N'Giao giờ hành chính giúp mình',
@@ -614,18 +877,16 @@ VALUES
 
 (N'DH20261104', 4, N'Lê Hoàng Khách Hàng', N'0987654321', N'Số 12 Cầu Giấy, Phường Quan Hoa, Cầu Giấy, Hà Nội', N'Đơn mới đặt chờ nhân viên xác nhận',
  N'COD - Thanh toán khi nhận hàng', 12990000, NULL, 0, 12990000, N'Chờ xác nhận', GETDATE(), GETDATE());
-GO
 
-INSERT INTO dbo.CHITIETDONHANG (OrderId, ProductId, ProductCode, ProductName, ImageUrl, UnitPrice, Quantity, LineTotal)
+INSERT INTO dbo.CHITIETDONHANG (ID_DONHANG, ID_SANPHAM, MA_SAN_PHAM, TEN_SAN_PHAM, DUONG_DAN_ANH, DON_GIA, SO_LUONG, THANH_TIEN)
 VALUES
 (1, 1, N'NBGI0099', N'Laptop Gigabyte AORUS 16X 9KG-43VNC54SH (Intel Core i7-13650HX | RTX 4060 | 16 inch WQXGA | 16GB | 1TB | Win 11 | Xám)', N'./anh pc/lap1.jpg', 31990000, 1, 31990000),
 (2, 8, N'PCAPT0199', N'PC ULTRA GAMING AI - PCAP TITAN (Intel Core i5-12400F | RTX 4060 8GB | 16GB RAM | 500GB NVMe SSD | PSU 650W)', N'./anh pc/pc8.jpg', 25399000, 1, 25399000),
 (3, 16, N'VGGI0324', N'VGA Gigabyte GeForce RTX 3060 WINDFORCE OC 12GB (GDDR6 | 192-bit | Dual Fan)', N'./anh pc/vga.jpg', 7999000, 1, 7999000),
 (3, 20, N'MOSS0148', N'Màn Hình Đồ Họa SAMSUNG ViewFinity S8 LS27B800 (27 inch | 4K UHD | IPS | 98% DCI-P3 | USB-C 90W)', N'./anh pc/monitor_ss.jpg', 7689000, 1, 7689000),
 (4, 6, N'NBAC0403', N'Laptop Acer Aspire 5 A514-56P-55K5 NX.KHRSV.003 (Core i5-1335U | 16GB LPDDR5 | 512GB SSD | 14 inch WUXGA IPS | Win 11)', N'./anh pc/lap_acer.jpg', 12990000, 1, 12990000);
-GO
 
-INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (OrderId, Status, Note, UpdatedBy, UpdatedAt)
+INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (ID_DONHANG, TRANG_THAI, GHI_CHU, NGUOI_CAP_NHAT, NGAY_CAP_NHAT)
 VALUES
 (1, N'Chờ xác nhận', N'Khách hàng tạo đơn hàng trực tuyến', N'khachhang', DATEADD(DAY, -5, GETDATE())),
 (1, N'Đang giao', N'Nhân viên đã xác nhận và bàn giao vận chuyển', N'staff', DATEADD(DAY, -4, GETDATE())),
@@ -635,4 +896,12 @@ VALUES
 (3, N'Chờ xác nhận', N'Khách hàng tạo đơn hàng trực tuyến', N'khachhang', DATEADD(DAY, -1, GETDATE())),
 (3, N'Đang giao', N'Đã đóng gói VGA và Màn hình, đang giao', N'staff', GETDATE()),
 (4, N'Chờ xác nhận', N'Khách hàng tạo đơn hàng trực tuyến', N'khachhang', GETDATE());
+
+    COMMIT TRANSACTION;
+END TRY
+BEGIN CATCH
+    IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;
+END;
 GO

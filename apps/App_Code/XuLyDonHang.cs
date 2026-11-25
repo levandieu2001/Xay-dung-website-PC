@@ -41,7 +41,7 @@ namespace PCMComputer
             for (int i = 0; i < items.Count; i++)
             {
                 CartItem item = items[i];
-                string sql = "SELECT ProductName, Price, StockQuantity, Status FROM dbo.SANPHAM WITH (UPDLOCK) WHERE ProductId = @pid";
+                string sql = "SELECT TEN_SAN_PHAM, GIA_BAN, SO_LUONG_TON, TRANG_THAI FROM dbo.SANPHAM WITH (UPDLOCK) WHERE ID_SANPHAM = @pid";
                 using (SqlCommand cmd = new SqlCommand(sql, conn, tran))
                 {
                     cmd.Parameters.AddWithValue("@pid", item.ProductId);
@@ -54,10 +54,10 @@ namespace PCMComputer
                             return false;
                         }
 
-                        string prodName = Convert.ToString(r["ProductName"]);
-                        decimal actualPrice = Convert.ToDecimal(r["Price"]);
-                        int actualStock = Convert.ToInt32(r["StockQuantity"]);
-                        string status = Convert.ToString(r["Status"]);
+                        string prodName = Convert.ToString(r["TEN_SAN_PHAM"]);
+                        decimal actualPrice = Convert.ToDecimal(r["GIA_BAN"]);
+                        int actualStock = Convert.ToInt32(r["SO_LUONG_TON"]);
+                        string status = Convert.ToString(r["TRANG_THAI"]);
 
                         if (status == "Ngừng kinh doanh" || actualStock < item.Quantity)
                         {
@@ -151,7 +151,7 @@ namespace PCMComputer
                     // Cập nhật lượt dùng mã khuyến mãi nếu có (UC16)
                     if (!string.IsNullOrEmpty(validVoucherCode))
                     {
-                        string vSql = "UPDATE dbo.KHUYENMAI SET UsedCount = UsedCount + 1 WHERE VoucherCode = @vcode";
+                        string vSql = "UPDATE dbo.KHUYENMAI SET SO_LUOT_DA_DUNG = SO_LUOT_DA_DUNG + 1 WHERE MA_GIAM_GIA = @vcode";
                         using (SqlCommand vCmd = new SqlCommand(vSql, conn, tran))
                         {
                             vCmd.Parameters.AddWithValue("@vcode", validVoucherCode);
@@ -160,7 +160,7 @@ namespace PCMComputer
                     }
 
                     // Ghi lịch sử khởi tạo đơn hàng
-                    string histSql = "INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (OrderId, Status, Note, UpdatedBy) VALUES (@oid, N'Chờ xác nhận', N'Khách hàng đặt hàng trực tuyến thành công', @by)";
+                    string histSql = "INSERT INTO dbo.LICHSUTRANGTHAIDONHANG (ID_DONHANG, TRANG_THAI, GHI_CHU, NGUOI_CAP_NHAT) VALUES (@oid, N'Chờ xác nhận', N'Khách hàng đặt hàng trực tuyến thành công', @by)";
                     using (SqlCommand hCmd = new SqlCommand(histSql, conn, tran))
                     {
                         hCmd.Parameters.AddWithValue("@oid", newOrderId);
@@ -194,8 +194,8 @@ namespace PCMComputer
                                 decimal subTotal, string voucherCode, decimal discountAmount, decimal totalAmount)
         {
             string sql = @"INSERT INTO dbo.DONHANG (
-                               OrderCode, UserId, ReceiverName, ReceiverPhone, ShippingAddress, Note,
-                               PaymentMethod, SubTotal, VoucherCode, DiscountAmount, TotalAmount, OrderStatus
+                               MA_DON_HANG, ID_TAIKHOAN, TEN_NGUOI_NHAN, DIEN_THOAI_NGUOI_NHAN, DIA_CHI_GIAO_HANG, GHI_CHU,
+                               PHUONG_THUC_THANH_TOAN, TAM_TINH, MA_GIAM_GIA, SO_TIEN_GIAM, TONG_TIEN, TRANG_THAI_DON_HANG
                            ) VALUES (
                                @code, @uid, @rname, @rphone, @addr, @note,
                                @pay, @sub, @vcode, @disc, @tot, N'Chờ xác nhận'
@@ -224,7 +224,7 @@ namespace PCMComputer
         private void insertOrderDetails(SqlConnection conn, SqlTransaction tran, int orderId, CartItem item)
         {
             string sql = @"INSERT INTO dbo.CHITIETDONHANG (
-                               OrderId, ProductId, ProductCode, ProductName, ImageUrl, UnitPrice, Quantity, LineTotal
+                               ID_DONHANG, ID_SANPHAM, MA_SAN_PHAM, TEN_SAN_PHAM, DUONG_DAN_ANH, DON_GIA, SO_LUONG, THANH_TIEN
                            ) VALUES (
                                @oid, @pid, @pcode, @pname, @img, @price, @qty, @total
                            )";
@@ -245,9 +245,9 @@ namespace PCMComputer
         private void updateProductStock(SqlConnection conn, SqlTransaction tran, int productId, int quantityToDeduct)
         {
             string sql = @"UPDATE dbo.SANPHAM
-                           SET StockQuantity = StockQuantity - @qty,
-                               SoldCount = SoldCount + @qty
-                           WHERE ProductId = @pid";
+                           SET SO_LUONG_TON = SO_LUONG_TON - @qty,
+                               SO_LUONG_DA_BAN = SO_LUONG_DA_BAN + @qty
+                           WHERE ID_SANPHAM = @pid";
             using (SqlCommand cmd = new SqlCommand(sql, conn, tran))
             {
                 cmd.Parameters.AddWithValue("@qty", quantityToDeduct);
